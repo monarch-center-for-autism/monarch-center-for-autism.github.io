@@ -1,0 +1,21 @@
+{
+  "name": "monarch-site",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.5.0",
+    "fuse.js": "^6.4.5",
+    "parcel-bundler": "^1.12.4",
+    "prettier": "^2.2.1",
+    "react": "^17.0.1",
+    "react-redux": "^7.2.2",
+    "tailwindcss": "^2.0.2"
+  }
+}
