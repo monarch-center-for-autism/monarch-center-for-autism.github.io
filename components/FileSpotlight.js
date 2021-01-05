@@ -1,22 +1,39 @@
 import React from "react";
-import FileViewer from "react-file-viewer";
 
 export default function FileSpotlight({ file }) {
   if (!file) return null;
 
-  const { webContentLink, name, description } = file;
+  const {
+    name,
+    description,
+    webViewLink,
+    fullFileExtension,
+    webContentLink,
+    exportLinks = [],
+  } = file;
 
-  const [, fileName, fileType] = /([^.]+)\.(.+)/.exec(name);
+  const downloadOptions = [
+    ...Object.entries(exportLinks),
+    ...(webContentLink ? [[fullFileExtension, webContentLink]] : []),
+  ];
 
   return (
-    <div>
-      <span className="w-full text-center mb-8 text-4xl block">{fileName}</span>
+    <div className="flex flex-col h-full">
+      <span className="w-full text-center mb-8 text-4xl block">
+        {name.replace("." + fullFileExtension, "")}
+      </span>
 
       {description && <p className="my-4">{description}</p>}
 
-      <div className="flex items-center justify-center">
-        <FileViewer fileType={fileType} filePath={webContentLink} />
-      </div>
+      <ul className="my-4 text-gray-700">
+        {downloadOptions.map(([extension, url]) => (
+          <li key={extension}>
+            <a href={url}>Download as {extension}</a>
+          </li>
+        ))}
+      </ul>
+
+      <iframe src={webViewLink.replace("view", "preview")} className="flex-1" />
     </div>
   );
 }

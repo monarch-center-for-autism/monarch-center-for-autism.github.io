@@ -9,7 +9,6 @@ export default function SearchBar() {
   const [value, setValue] = useState("");
 
   function handleOnChange(e) {
-    console.log(e);
     setValue(e.target.value);
     dispatch(actions.search(e.target.value));
   }

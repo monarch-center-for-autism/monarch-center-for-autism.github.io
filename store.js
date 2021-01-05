@@ -4,16 +4,28 @@ import {
   createSlice,
 } from "@reduxjs/toolkit";
 import Fuse from "fuse.js";
+import groupBy from "lodash.groupby";
+import mapKeys from "lodash.mapkeys";
+import partition from "lodash.partition";
 
-const fuse = new Fuse([], {});
+const fuse = new Fuse([], { keys: ["name"] });
 
 const fetchData = createAsyncThunk("fetchData", async () => {
   const response = await window.gapi.client.drive.files.list({
-    pageSize: 10,
     fields:
-      "nextPageToken, files(id, name, description, iconLink, thumbnailLink, contentHints, webContentLink)",
+      "nextPageToken, files(id, name, description, iconLink, thumbnailLink, contentHints, webViewLink, exportLinks, webContentLink, fullFileExtension, parents, properties, mimeType)",
   });
-  return response.result.files;
+
+  const [folders, files] = partition(response.result.files, [
+    "mimeType",
+    "application/vnd.google-apps.folder",
+  ]);
+
+  const idCategories = groupBy(files, "parents[0]");
+  return mapKeys(
+    idCategories,
+    (_, id) => folders.find((f) => f.id === id)?.name ?? "Missing Folder"
+  );
 });
 
 const { actions, reducer } = createSlice({
@@ -27,7 +39,7 @@ const { actions, reducer } = createSlice({
   reducers: {
     search: (state, { payload }) => {
       state.query = payload;
-      state.displayData = fuse.search(payload);
+      state.displayData = fuse.search(payload).map((r) => r.item);
     },
   },
   extraReducers: {
