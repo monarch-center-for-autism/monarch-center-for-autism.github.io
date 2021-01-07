@@ -1,4 +1,4 @@
-import { faSync, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -37,34 +37,19 @@ export default function LogInButton() {
   function updateSignInStatus(isSignedIn) {
     setLoggedIn(isSignedIn);
     if (isSignedIn) {
-      handleFetchData();
+      dispatch(fetchData());
     }
-  }
-
-  function handleFetchData() {
-    dispatch(fetchData());
   }
 
   function logIn() {
     window.gapi.auth2.getAuthInstance().signIn();
   }
 
-  return isLoggedIn ? (
-    <button>
-      <FontAwesomeIcon
-        icon={faSync}
-        className="mr-2"
-        onClick={handleFetchData}
-      />
-      Refresh Data
-    </button>
-  ) : (
+  if (isLoggedIn) return null;
+
+  return (
     <button onClick={logIn}>
-      <FontAwesomeIcon
-        icon={faUser}
-        className="mr-2"
-        onClick={handleFetchData}
-      />
+      <FontAwesomeIcon icon={faUser} className="mr-2" onClick={logIn} />
       Log In
     </button>
   );

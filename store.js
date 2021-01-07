@@ -12,6 +12,7 @@ const fuse = new Fuse([], { keys: ["name"] });
 
 const fetchData = createAsyncThunk("fetchData", async () => {
   const response = await window.gapi.client.drive.files.list({
+    includeItemsFromAllDrives: false,
     fields:
       "nextPageToken, files(id, name, description, iconLink, thumbnailLink, contentHints, webViewLink, exportLinks, webContentLink, fullFileExtension, parents, properties, mimeType)",
   });
