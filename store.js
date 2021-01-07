@@ -11,8 +11,9 @@ import partition from "lodash.partition";
 const fuse = new Fuse([], { keys: ["name"] });
 
 const fetchData = createAsyncThunk("fetchData", async () => {
-  const response = await window.gapi.client.drive.files.list({
-    includeItemsFromAllDrives: false,
+  const response = await drive.files.list({
+    q: "",
+    spaces: "drive",
     fields:
       "nextPageToken, files(id, name, description, iconLink, thumbnailLink, contentHints, webViewLink, exportLinks, webContentLink, fullFileExtension, parents, properties, mimeType)",
   });
