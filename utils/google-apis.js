@@ -1,11 +1,15 @@
 const DISCOVERY_DOCS = [
   "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
 ];
-const SCOPES = "https://www.googleapis.com/auth/drive.readonly";
+const SCOPES = [
+  "https://www.googleapis.com/auth/drive.readonly",
+  "https://www.googleapis.com/auth/userinfo.profile",
+].join(" ");
 
 const LS_KEYS = {
   ROOT_FOLDER_ID: "root_folder_id",
   SITE_STRUCTURE: "site_structure",
+  USER: "user",
 };
 
 const IsFolder =
@@ -38,6 +42,23 @@ export async function initGoogleClient() {
 
 export function isSignedIn() {
   return window.gapi.auth2.getAuthInstance().isSignedIn.get();
+}
+
+export function getUser() {
+  const lsUser = localStorage.getItem(LS_KEYS.USER);
+  if (lsUser) return JSON.parse(lsUser);
+
+  const gUser = window.gapi.auth2
+    .getAuthInstance()
+    .currentUser.get()
+    .getBasicProfile();
+  const user = {
+    name: gUser.getName(),
+    imageUrl: gUser.getImageUrl(),
+  };
+
+  localStorage.setItem(LS_KEYS.USER, JSON.stringify(user));
+  return user;
 }
 
 export async function signIn() {
@@ -73,7 +94,7 @@ async function getRootFolderId() {
 
 export async function getSiteStructure() {
   const lsSiteStructure = localStorage.getItem(LS_KEYS.SITE_STRUCTURE);
-  if (lsSiteStructure) return lsSiteStructure;
+  if (lsSiteStructure) return JSON.parse(lsSiteStructure);
 
   const rootFolderId = await getRootFolderId();
   const pagesResponse = await window.gapi.client.drive.files.list({

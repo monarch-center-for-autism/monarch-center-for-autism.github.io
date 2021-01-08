@@ -2,7 +2,6 @@ import DataBrowser from "./pages/DataBrowser";
 import React from "react";
 import { Route, Switch } from "react-router-dom";
 import Home from "./pages/Home";
-import PageNotFound from "./pages/PageNotFound";
 import Search from "./pages/Search";
 import useAuth from "./utils/useAuth";
 

@@ -12,12 +12,17 @@ const fetchStructure = createAsyncThunk("fetchData", async () => {
   return await google.getSiteStructure();
 });
 
+const refreshData = createAsyncThunk("refreshData", async () => {
+  google.clearCache();
+  return await google.getSiteStructure();
+});
+
 const { actions, reducer } = createSlice({
   name: "data",
   initialState: {
+    user: "",
     query: "",
     data: [],
-    displayData: [],
     loading: false,
   },
   reducers: {
@@ -25,19 +30,29 @@ const { actions, reducer } = createSlice({
       state.query = payload;
       state.displayData = fuse.search(payload).map((r) => r.item);
     },
+    setUser: (state, { payload }) => {
+      state.user = payload;
+    },
   },
   extraReducers: {
     [fetchStructure.pending]: (state) => {
       state.loading = true;
     },
     [fetchStructure.fulfilled]: (state, { payload }) => {
-      fuse.setCollection(payload);
-
       state.data = payload;
-      state.displayData = fuse.search(state.query);
       state.loading = false;
     },
     [fetchStructure.rejected]: (state) => {
+      state.loading = false;
+    },
+    [refreshData.pending]: (state) => {
+      state.loading = true;
+    },
+    [refreshData.fulfilled]: (state, { payload }) => {
+      state.data = payload;
+      state.loading = false;
+    },
+    [refreshData.rejected]: (state) => {
       state.loading = false;
     },
   },
@@ -45,4 +60,4 @@ const { actions, reducer } = createSlice({
 
 const store = configureStore({ reducer });
 
-export { actions, store, fetchStructure };
+export { actions, store, fetchStructure, refreshData };

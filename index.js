@@ -11,8 +11,8 @@ import Sidebar from "./structure/SideBar";
 
 const theme = extendTheme({
   fonts: {
-    heading: "Open Sans",
-    body: "Raleway",
+    heading: "Patua One",
+    body: "Rubik",
   },
 });
 
