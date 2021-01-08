@@ -1,7 +1,6 @@
 import {
   Box,
   Text,
-  Button,
   Divider,
   Avatar,
   Flex,
@@ -10,10 +9,27 @@ import {
   SkeletonCircle,
   SkeletonText,
 } from "@chakra-ui/react";
+import styled from "@emotion/styled";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
 import { refreshData } from "../store";
+
+const StyledNavLink = styled(NavLink)`
+  &.active {
+    cursor: default;
+    font-weight: bold;
+
+    &:hover {
+      text-decoration: none;
+    }
+
+    &:focus {
+      border: none;
+      box-shadow: none;
+    }
+  }
+`;
 
 export default function Sidebar() {
   const user = useSelector((state) => state.user);
@@ -40,7 +56,7 @@ export default function Sidebar() {
       <Text color="gray.600" mb={2}>
         Actions
       </Text>
-      <Link as={NavLink} to="/search" display="block" mb={2}>
+      <Link as={StyledNavLink} to="/search" display="block" mb={2}>
         Search
       </Link>
       <Link onClick={handleRefreshData}>Refresh Data</Link>
@@ -51,7 +67,7 @@ export default function Sidebar() {
       <SkeletonText noOfLines={10} spacing={4} isLoaded={pages.length > 0}>
         {pages.map(({ name }) => (
           <Link
-            as={NavLink}
+            as={StyledNavLink}
             to={`/${name.toLowerCase()}`}
             display="block"
             mb={2}
