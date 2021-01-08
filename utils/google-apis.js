@@ -99,16 +99,15 @@ export async function getSiteStructure() {
   const rootFolderId = await getRootFolderId();
   const pagesResponse = await window.gapi.client.drive.files.list({
     q: `${IsFolder} and '${rootFolderId}' in parents`,
-    spaces: "drive",
-    fields: "files(id, name)",
+    fields: "files(id, name, shortcutDetails)",
   });
 
   const pageStructure = await Promise.all(
     pagesResponse.result.files.map(async (folder) => {
+      console.log(folder, getId(folder));
       const categoriesResponse = await window.gapi.client.drive.files.list({
         q: `${IsFolder} and '${getId(folder)}' in parents`,
-        spaces: "drive",
-        fields: `files(id, name)`,
+        fields: `files(id, name, shortcutDetails)`,
       });
 
       return {
