@@ -81,7 +81,6 @@ export async function getSiteStructure() {
 
   const pageStructure = await Promise.all(
     pagesResponse.result.files.map(async (folder) => {
-      console.log(folder, getId(folder));
       const categoriesResponse = await window.gapi.client.drive.files.list({
         q: `${IsFolder} and '${getId(folder)}' in parents`,
         fields: `files(id, name, shortcutDetails)`,
@@ -89,10 +88,7 @@ export async function getSiteStructure() {
 
       return {
         ...folder,
-        categories: categoriesResponse.result.files.map((category) => ({
-          ...category,
-          files: [],
-        })),
+        categories: categoriesResponse.result.files,
       };
     })
   );
@@ -109,5 +105,5 @@ export async function getFiles(category, pageToken) {
     fields: `nextPageToken, files(${FileProps})`,
   });
 
-  return response.results;
+  return response.result;
 }

@@ -11,21 +11,33 @@ import {
   CircularProgress,
 } from "@chakra-ui/react";
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import File from "../components/File";
 import FileSpotlight from "../components/FileSpotlight";
 import PageNotFound from "./PageNotFound";
+import { fetchCategory } from "../store";
 
 export default function DataBrowser() {
   const { page } = useParams();
   const allData = useSelector((state) => state.data);
   const [activeFile, setActiveFile] = useState(null);
+  const dispatch = useDispatch();
 
   const pageData = allData.find(
     ({ id, name }) =>
       new RegExp(id).test(page) || new RegExp(name, "i").test(page)
   );
+
+  useEffect(() => {
+    if (!pageData) return;
+
+    pageData.categories.forEach(({ id, name, files }) => {
+      if (!files) {
+        dispatch(fetchCategory(id));
+      }
+    });
+  }, [pageData]);
 
   function handleOnClose() {
     setActiveFile(null);
@@ -43,15 +55,15 @@ export default function DataBrowser() {
     <>
       <Box p={4}>
         {pageData.categories.map(({ name, files }) => (
-          <Box mb={8}>
+          <Box mb={8} key={name}>
             <Heading mb={4}>{name}</Heading>
             <SimpleGrid spacing={10} columns={3}>
-              {files.map((file, i) => {
+              {(files ?? []).map((file) => {
                 function onClick() {
                   setActiveFile(file);
                 }
 
-                return <File file={file} key={i} onClick={onClick} />;
+                return <File file={file} key={file.id} onClick={onClick} />;
               })}
             </SimpleGrid>
           </Box>

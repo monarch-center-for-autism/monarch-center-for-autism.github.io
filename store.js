@@ -3,6 +3,7 @@ import {
   createAsyncThunk,
   createSlice,
 } from "@reduxjs/toolkit";
+import findCategory from "./utils/findCategory";
 import * as google from "./utils/google-apis";
 
 const fetchStructure = createAsyncThunk("fetchData", async () => {
@@ -12,11 +13,14 @@ const fetchStructure = createAsyncThunk("fetchData", async () => {
 const fetchCategory = createAsyncThunk(
   "refreshData",
   async (category, thunkAPI) => {
-    const nextPageToken = thunkAPI
+    thunkAPI.dispatch(actions.initCategory(category));
+    const pageToken = thunkAPI
       .getState()
       .data.flatMap((d) => d.categories)
       .find((c) => c.id === category)?.nextPageToken;
-    return await google.getFiles(category, nextPageToken);
+    const { nextPageToken, files } = await google.getFiles(category, pageToken);
+
+    return { category, nextPageToken, files };
   }
 );
 
@@ -30,6 +34,10 @@ const { actions, reducer } = createSlice({
     setUser: (state, { payload }) => {
       state.user = payload;
     },
+    initCategory: (state, { payload }) => {
+      const [pageIndex, categoryIndex] = findCategory(state.data, payload);
+      state.data[pageIndex].categories[categoryIndex].files = [];
+    },
   },
   extraReducers: {
     [fetchStructure.fulfilled]: (state, { payload }) => {
@@ -37,19 +45,19 @@ const { actions, reducer } = createSlice({
       state.loading = false;
     },
     [fetchCategory.fulfilled]: (state, { payload }) => {
-      const { page, category, files, nextPageToken } = payload;
-      const pageIndex = state.data.findIndex((p) => p.id === page);
-      const categoryIndex = state.data[pageIndex].categories.findIndex(
-        (c) => c.id === category
-      );
+      console.log(payload);
+      const { category, files, nextPageToken } = payload;
+      const [pageIndex, categoryIndex] = findCategory(state.data, category);
+
       state.data[pageIndex].categories[
         categoryIndex
       ].nextPageToken = nextPageToken;
-      state.data[pageIndex].categories[categoryIndex].files.append(files);
+
+      state.data[pageIndex].categories[categoryIndex].files.push(...files);
     },
   },
 });
 
 const store = configureStore({ reducer });
 
-export { actions, store, fetchStructure };
+export { actions, store, fetchStructure, fetchCategory };
