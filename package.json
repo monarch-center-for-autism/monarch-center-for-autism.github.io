@@ -14,27 +14,25 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@chakra-ui/react": "^1.1.2",
+    "@emotion/react": "^11.1.4",
+    "@emotion/styled": "^11.0.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.32",
     "@fortawesome/free-solid-svg-icons": "^5.15.1",
     "@fortawesome/react-fontawesome": "^0.1.14",
-    "@google-cloud/local-auth": "^1.0.0",
     "@reduxjs/toolkit": "^1.5.0",
     "@tailwindcss/postcss7-compat": "^2.0.2",
-    "autoprefixer": "^9.8.6",
+    "framer-motion": "^3.1.4",
     "fuse.js": "^6.4.5",
-    "googleapis": "^66.0.0",
-    "http2": "^3.3.7",
     "lodash.groupby": "^4.6.0",
     "lodash.mapkeys": "^4.6.0",
     "lodash.partition": "^4.6.0",
     "parcel-bundler": "^1.12.4",
     "pkg": "^4.4.9",
-    "postcss": "^7.0.35",
     "prettier": "^2.2.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-redux": "^7.2.2",
-    "store": "^2.0.12",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2"
+    "react-router-dom": "^5.2.0"
   }
 }

@@ -4,30 +4,12 @@ import {
   createSlice,
 } from "@reduxjs/toolkit";
 import Fuse from "fuse.js";
-import groupBy from "lodash.groupby";
-import mapKeys from "lodash.mapkeys";
-import partition from "lodash.partition";
+import * as google from "./utils/google-apis";
 
 const fuse = new Fuse([], { keys: ["name"] });
 
-const fetchData = createAsyncThunk("fetchData", async () => {
-  const response = await drive.files.list({
-    q: "",
-    spaces: "drive",
-    fields:
-      "nextPageToken, files(id, name, description, iconLink, thumbnailLink, contentHints, webViewLink, exportLinks, webContentLink, fullFileExtension, parents, properties, mimeType)",
-  });
-
-  const [folders, files] = partition(response.result.files, [
-    "mimeType",
-    "application/vnd.google-apps.folder",
-  ]);
-
-  const idCategories = groupBy(files, "parents[0]");
-  return mapKeys(
-    idCategories,
-    (_, id) => folders.find((f) => f.id === id)?.name ?? "Missing Folder"
-  );
+const fetchStructure = createAsyncThunk("fetchData", async () => {
+  return await google.getSiteStructure();
 });
 
 const { actions, reducer } = createSlice({
@@ -45,17 +27,17 @@ const { actions, reducer } = createSlice({
     },
   },
   extraReducers: {
-    [fetchData.pending]: (state) => {
+    [fetchStructure.pending]: (state) => {
       state.loading = true;
     },
-    [fetchData.fulfilled]: (state, { payload }) => {
+    [fetchStructure.fulfilled]: (state, { payload }) => {
       fuse.setCollection(payload);
 
       state.data = payload;
       state.displayData = fuse.search(state.query);
       state.loading = false;
     },
-    [fetchData.rejected]: (state) => {
+    [fetchStructure.rejected]: (state) => {
       state.loading = false;
     },
   },
@@ -63,4 +45,4 @@ const { actions, reducer } = createSlice({
 
 const store = configureStore({ reducer });
 
-export { actions, store, fetchData };
+export { actions, store, fetchStructure };

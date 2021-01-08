@@ -1,18 +1,15 @@
 import React from "react";
+import { Flex, Spacer } from "@chakra-ui/react";
 import LogInButton from "./LogInButton";
 import SearchBar from "./SearchBar";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSync } from "@fortawesome/free-solid-svg-icons";
-import { actions } from "../store";
 
 export default function Header() {
   return (
-    <div className="w-full p-4 bg-blue-800 text-white text-white">
-      <h1 className="inline-block">Drive Resource Viewer</h1>
-      <div className="float-right flex">
-        <LogInButton />
-        <SearchBar />
-      </div>
-    </div>
+    <Flex bg="cyan.400" color="gray.50" padding={4}>
+      <h1>Drive Resource Viewer</h1>
+      <Spacer />
+      <LogInButton />
+      <SearchBar />
+    </Flex>
   );
 }

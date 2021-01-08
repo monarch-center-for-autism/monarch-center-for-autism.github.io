@@ -1,14 +1,15 @@
-import { google } from "googleapis";
-import partition from "lodash.partition";
+const DISCOVERY_DOCS = [
+  "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
+];
+const SCOPES = "https://www.googleapis.com/auth/drive.readonly";
 
-const drive = google.drive("v3");
 const LS_KEYS = {
   ROOT_FOLDER_ID: "root_folder_id",
   SITE_STRUCTURE: "site_structure",
 };
 
 const IsFolder =
-  "(mimeType = application/vnd.google-apps.folder or mimeType = application/vnd.google-apps.shortcut)";
+  "(mimeType = 'application/vnd.google-apps.folder' or mimeType = 'application/vnd.google-apps.shortcut')";
 const FileProps = [
   "id",
   "name",
@@ -25,6 +26,16 @@ const FileProps = [
   "mimeType",
 ].join(", ");
 
+export async function initGoogleClient() {
+  await new Promise((resolve) => window.gapi.load("client:auth2", resolve));
+  await window.gapi.client.init({
+    apiKey: process.env.API_KEY,
+    clientId: process.env.CLIENT_ID,
+    discoveryDocs: DISCOVERY_DOCS,
+    scope: SCOPES,
+  });
+}
+
 export function clearCache() {
   localStorage.clear();
 }
@@ -37,7 +48,7 @@ async function getRootFolderId() {
   const lsFolderId = localStorage.getItem(LS_KEYS.ROOT_FOLDER_ID);
   if (lsFolderId) return lsFolderId;
 
-  const response = await drive.files.list({
+  const response = await window.gapi.client.drive.files.list({
     q: `${IsFolder} and name = 'Monarch Website'`,
     spaces: "drive",
     fields: "files(id, shortcutDetails)",
@@ -53,23 +64,26 @@ export async function getSiteStructure() {
   if (lsSiteStructure) return lsSiteStructure;
 
   const rootFolderId = await getRootFolderId();
-  const pagesResponse = await drive.files.list({
-    q: `${IsFolder} and ${rootFolderId} in parents`,
+  const pagesResponse = await window.gapi.client.drive.files.list({
+    q: `${IsFolder} and '${rootFolderId}' in parents`,
     spaces: "drive",
     fields: "files(id, name)",
   });
 
   const pageStructure = await Promise.all(
     pagesResponse.result.files.map(async (folder) => {
-      const categoriesResponse = await drive.files.list({
-        q: `${IsFolder} and ${getId(folder)} in parents`,
+      const categoriesResponse = await window.gapi.client.drive.files.list({
+        q: `${IsFolder} and '${getId(folder)}' in parents`,
         spaces: "drive",
         fields: `files(id, name)`,
       });
 
       return {
         ...folder,
-        categories: categoriesResponse.result.files,
+        categories: categoriesResponse.result.files.map((category) => ({
+          ...category,
+          files: [],
+        })),
       };
     })
   );
@@ -82,7 +96,7 @@ export async function getSiteStructure() {
 export async function getFiles(category, pageToken) {
   // TODO: How to best cache this?
 
-  const response = await drive.files.list({
+  const response = await gapi.client.drive.files.list({
     pageToken,
     q: `mimeType = application/vnd.google-apps.folder and ${category} in parents`,
     spaces: "drive",

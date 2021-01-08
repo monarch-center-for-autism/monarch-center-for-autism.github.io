@@ -1,31 +1,46 @@
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { google } from "googleapis";
-import { authenticate } from "@google-cloud/local-auth";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { fetchData } from "../store";
+import { initGoogleClient } from "../utils/google-apis";
+import { fetchStructure } from "../store";
+import { Button } from "@chakra-ui/react";
 
 export default function LogInButton() {
   const [isLoggedIn, setLoggedIn] = useState(false);
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    async function init() {
+      await initGoogleClient();
+      window.gapi.auth2
+        .getAuthInstance()
+        .isSignedIn.listen(handleIsSignedInChange);
+      handleIsSignedInChange(
+        window.gapi.auth2.getAuthInstance().isSignedIn.get()
+      );
+    }
+
+    init().then(/* do nothing */);
+  });
+
+  function handleIsSignedInChange(val) {
+    setLoggedIn(val);
+    if (val) dispatch(fetchStructure());
+  }
+
   async function logIn() {
-    const auth = await authenticate({
-      keyfilePath: path.join(__dirname, "../oauth2.keys.json"),
-      scopes: "https://www.googleapis.com/auth/drive.readonly",
-    });
-    google.options({ auth });
-    dispatch(fetchData());
-    setLoggedIn(true);
+    await window.gapi.auth2.getAuthInstance().signIn();
   }
 
   if (isLoggedIn) return null;
 
   return (
-    <button onClick={logIn}>
-      <FontAwesomeIcon icon={faUser} className="mr-2" />
-      Log In
-    </button>
+    <>
+      <Button onClick={logIn} colorScheme="blue">
+        <FontAwesomeIcon icon={faUser} style={{ marginRight: "0.5rem" }} />
+        Log In
+      </Button>
+    </>
   );
 }

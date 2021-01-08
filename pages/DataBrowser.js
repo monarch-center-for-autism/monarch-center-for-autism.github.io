@@ -2,12 +2,20 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSync } from "@fortawesome/free-solid-svg-icons";
-import File from "./File";
-import FileSpotlight from "./FileSpotlight";
-import Modal from "./Modal";
+import { useParams } from "react-router-dom";
+import File from "../components/File";
+import FileSpotlight from "../components/FileSpotlight";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+} from "@chakra-ui/react";
 
 export default function DataBrowser() {
-  const query = useSelector((state) => state.query);
+  const { page } = useParams();
   const data = useSelector((state) => state.data);
   const searchResults = useSelector((state) => state.displayData);
   const loading = useSelector((state) => state.loading);
@@ -16,10 +24,6 @@ export default function DataBrowser() {
 
   function handleOnClose() {
     setActiveFile(null);
-  }
-
-  function openFilePreview(file) {
-    setActiveFile(file);
   }
 
   if (loading) {
@@ -32,13 +36,6 @@ export default function DataBrowser() {
 
   return (
     <div className="flex-1 p-4">
-      {query && (
-        <div className="w-full py-8 text-center">
-          <span className="text-lg text-gray-700">
-            Showing search results for "{query}"
-          </span>
-        </div>
-      )}
       {query && searchResults.length === 0 && (
         <div className="w-full py-8 text-center">
           <span className="text-2xl">
@@ -72,8 +69,16 @@ export default function DataBrowser() {
             </div>
           </div>
         ))}
-      <Modal show={activeFile} onClose={handleOnClose}>
-        <FileSpotlight file={activeFile} />
+
+      <Modal isOpen={activeFile} onClose={handleOnClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Modal Title</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FileSpotlight file={activeFile} />
+          </ModalBody>
+        </ModalContent>
       </Modal>
     </div>
   );
