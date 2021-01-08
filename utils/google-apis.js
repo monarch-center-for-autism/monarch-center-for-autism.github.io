@@ -36,6 +36,18 @@ export async function initGoogleClient() {
   });
 }
 
+export function isSignedIn() {
+  return window.gapi.auth2.getAuthInstance().isSignedIn.get();
+}
+
+export async function signIn() {
+  await window.gapi.auth2.getAuthInstance().signIn();
+}
+
+export function setOnAuthStatusChange(handler) {
+  window.gapi.auth2.getAuthInstance().isSignedIn.listen(handler);
+}
+
 export function clearCache() {
   localStorage.clear();
 }
