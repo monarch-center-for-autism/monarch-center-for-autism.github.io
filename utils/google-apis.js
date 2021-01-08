@@ -6,12 +6,6 @@ const SCOPES = [
   "https://www.googleapis.com/auth/userinfo.profile",
 ].join(" ");
 
-const LS_KEYS = {
-  ROOT_FOLDER_ID: "root_folder_id",
-  SITE_STRUCTURE: "site_structure",
-  USER: "user",
-};
-
 const IsFolder =
   "(mimeType = 'application/vnd.google-apps.folder' or mimeType = 'application/vnd.google-apps.shortcut')";
 const FileProps = [
@@ -45,20 +39,14 @@ export function isSignedIn() {
 }
 
 export function getUser() {
-  const lsUser = localStorage.getItem(LS_KEYS.USER);
-  if (lsUser) return JSON.parse(lsUser);
-
   const gUser = window.gapi.auth2
     .getAuthInstance()
     .currentUser.get()
     .getBasicProfile();
-  const user = {
+  return {
     name: gUser.getName(),
     imageUrl: gUser.getImageUrl(),
   };
-
-  localStorage.setItem(LS_KEYS.USER, JSON.stringify(user));
-  return user;
 }
 
 export async function signIn() {
@@ -69,18 +57,11 @@ export function setOnAuthStatusChange(handler) {
   window.gapi.auth2.getAuthInstance().isSignedIn.listen(handler);
 }
 
-export function clearCache() {
-  localStorage.clear();
-}
-
 function getId(file) {
   return file.shortcutDetails?.targetId ?? file.id;
 }
 
 async function getRootFolderId() {
-  const lsFolderId = localStorage.getItem(LS_KEYS.ROOT_FOLDER_ID);
-  if (lsFolderId) return lsFolderId;
-
   const response = await window.gapi.client.drive.files.list({
     q: `${IsFolder} and name = 'Monarch Website'`,
     spaces: "drive",
@@ -88,14 +69,10 @@ async function getRootFolderId() {
   });
 
   const [{ id }] = response.result.files;
-  localStorage.setItem(LS_KEYS.ROOT_FOLDER_ID, id);
   return id;
 }
 
 export async function getSiteStructure() {
-  const lsSiteStructure = localStorage.getItem(LS_KEYS.SITE_STRUCTURE);
-  if (lsSiteStructure) return JSON.parse(lsSiteStructure);
-
   const rootFolderId = await getRootFolderId();
   const pagesResponse = await window.gapi.client.drive.files.list({
     q: `${IsFolder} and '${rootFolderId}' in parents`,
@@ -120,17 +97,14 @@ export async function getSiteStructure() {
     })
   );
 
-  localStorage.setItem(LS_KEYS.SITE_STRUCTURE, JSON.stringify(pageStructure));
   return pageStructure;
 }
 
 // Note - we don't need the page because folder IDs are globally unique in Drive
 export async function getFiles(category, pageToken) {
-  // TODO: How to best cache this?
-
   const response = await gapi.client.drive.files.list({
     pageToken,
-    q: `mimeType = application/vnd.google-apps.folder and ${category} in parents`,
+    q: `mimeType != 'application/vnd.google-apps.folder' and '${category}' in parents`,
     spaces: "drive",
     fields: `nextPageToken, files(${FileProps})`,
   });
