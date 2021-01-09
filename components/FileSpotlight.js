@@ -1,10 +1,13 @@
+import { Button, ButtonGroup, Link, Text, Flex } from "@chakra-ui/react";
 import React from "react";
+import mimeTypes from "../utils/mimeTypes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
 export default function FileSpotlight({ file }) {
   if (!file) return null;
 
   const {
-    name,
     description,
     webViewLink,
     fullFileExtension,
@@ -18,22 +21,26 @@ export default function FileSpotlight({ file }) {
   ];
 
   return (
-    <div className="flex flex-col h-full">
-      <span className="w-full text-center mb-8 text-4xl block">
-        {name.replace("." + fullFileExtension, "")}
-      </span>
+    <Flex direction="column" h="full">
+      {description && <Text mb={8}>{description}</Text>}
 
-      {description && <p className="my-4">{description}</p>}
-
-      <ul className="my-4 text-gray-700">
-        {downloadOptions.map(([extension, url]) => (
-          <li key={extension}>
-            <a href={url}>Download as {extension}</a>
-          </li>
+      <ButtonGroup mb={4}>
+        {downloadOptions.map(([mimeType, url]) => (
+          <Button
+            href={url}
+            key={mimeType}
+            as={Link}
+            leftIcon={<FontAwesomeIcon icon={faDownload} />}
+          >
+            Download as {mimeTypes(mimeType)}
+          </Button>
         ))}
-      </ul>
+      </ButtonGroup>
 
-      <iframe src={webViewLink.replace("view", "preview")} className="flex-1" />
-    </div>
+      <iframe
+        src={webViewLink.replace("view", "preview")}
+        style={{ width: "100%", flex: 1, marginBottom: "1rem" }}
+      />
+    </Flex>
   );
 }

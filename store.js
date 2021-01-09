@@ -29,6 +29,7 @@ const { actions, reducer } = createSlice({
   initialState: {
     user: "",
     data: [],
+    activeFile: null,
   },
   reducers: {
     setUser: (state, { payload }) => {
@@ -38,6 +39,9 @@ const { actions, reducer } = createSlice({
       const [pageIndex, categoryIndex] = findCategory(state.data, payload);
       state.data[pageIndex].categories[categoryIndex].files = [];
     },
+    setActiveFile: (state, { payload }) => {
+      state.activeFile = payload;
+    },
   },
   extraReducers: {
     [fetchStructure.fulfilled]: (state, { payload }) => {
@@ -45,7 +49,6 @@ const { actions, reducer } = createSlice({
       state.loading = false;
     },
     [fetchCategory.fulfilled]: (state, { payload }) => {
-      console.log(payload);
       const { category, files, nextPageToken } = payload;
       const [pageIndex, categoryIndex] = findCategory(state.data, category);
 

@@ -1,23 +1,51 @@
+import { Box, Image, Text } from "@chakra-ui/react";
 import React from "react";
 
 export default function File({ file, onClick }) {
+  if (!file) return <div />;
+  if (file.id === "placeholder") return <Box h={60} w={60} />;
+
   const { name, iconLink, thumbnailLink, description } = file;
   return (
-    <div
-      className="shadow hover:shadow-lg cursor-pointer transition duration-75 pb-4"
+    <Box
+      shadow="md"
+      _hover={{
+        shadow: "xl",
+      }}
+      transition="ease-in-out 0.2s"
+      cursor="pointer"
+      borderWidth="1px"
+      borderRadius="lg"
       onClick={onClick}
+      h={60}
+      position="relative"
+      overflow="hidden"
     >
-      <div className="w-full h-32 overflow-hidden">
-        <img src={thumbnailLink} className="w-full h-auto" alt="" />
-      </div>
+      <Image src={thumbnailLink} alt="" position="absolute" w="full" h="auto" />
 
-      <span className="p-4 font-bold overflow-ellipsis overflow-hidden whitespace-nowrap block">
-        <img src={iconLink} className="mr-4 h-4 w-4 inline-block" alt="" />
+      <Box
+        p={4}
+        position="absolute"
+        bottom={0}
+        left={0}
+        right={0}
+        zIndex={2}
+        background="white"
+      >
+        <Text fontWeight="bold" isTruncated>
+          <Image
+            src={iconLink}
+            mr={4}
+            h={4}
+            w={4}
+            display="inline-block"
+            alt=""
+          />
+          {name}
+        </Text>
 
-        {name}
-      </span>
-
-      <span className="p-4">{description}</span>
-    </div>
+        <Text>{description}</Text>
+      </Box>
+    </Box>
   );
 }

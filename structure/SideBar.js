@@ -13,7 +13,6 @@ import styled from "@emotion/styled";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
-import { refreshData } from "../store";
 
 const StyledNavLink = styled(NavLink)`
   &.active {
@@ -34,11 +33,6 @@ const StyledNavLink = styled(NavLink)`
 export default function Sidebar() {
   const user = useSelector((state) => state.user);
   const pages = useSelector((state) => state.data);
-  const dispatch = useDispatch();
-
-  function handleRefreshData() {
-    dispatch(refreshData());
-  }
 
   return (
     <Box p={4} bg="gray.200" w={60} flexShrink={0}>
@@ -53,15 +47,14 @@ export default function Sidebar() {
         </Skeleton>
       </Flex>
       <Divider borderColor="gray.400" my={4} />
-      <Text color="gray.600" mb={2}>
+      <Text color="gray.500" mb={2} textTransform="uppercase" fontSize="sm">
         Actions
       </Text>
       <Link as={StyledNavLink} to="/search" display="block" mb={2}>
         Search
       </Link>
-      <Link onClick={handleRefreshData}>Refresh Data</Link>
-      <Divider borderColor="gray.400" my={4} />
-      <Text color="gray.600" mb={2}>
+      <Divider borderColor="gray.300" my={4} />
+      <Text color="gray.500" mb={2} textTransform="uppercase" fontSize="sm">
         Pages
       </Text>
       <SkeletonText noOfLines={10} spacing={4} isLoaded={pages.length > 0}>

@@ -1,27 +1,22 @@
 import {
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
   Box,
   Heading,
   SimpleGrid,
   CircularProgress,
+  Skeleton,
 } from "@chakra-ui/react";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import File from "../components/File";
-import FileSpotlight from "../components/FileSpotlight";
 import PageNotFound from "./PageNotFound";
-import { fetchCategory } from "../store";
+import { fetchCategory, actions } from "../store";
+
+const placeholders = Array(5).fill({ id: "placeholder" });
 
 export default function DataBrowser() {
   const { page } = useParams();
   const allData = useSelector((state) => state.data);
-  const [activeFile, setActiveFile] = useState(null);
   const dispatch = useDispatch();
 
   const pageData = allData.find(
@@ -32,16 +27,12 @@ export default function DataBrowser() {
   useEffect(() => {
     if (!pageData) return;
 
-    pageData.categories.forEach(({ id, name, files }) => {
+    pageData.categories.forEach(({ id, files }) => {
       if (!files) {
         dispatch(fetchCategory(id));
       }
     });
   }, [pageData]);
-
-  function handleOnClose() {
-    setActiveFile(null);
-  }
 
   if (allData.length === 0) {
     return <CircularProgress isIndeterminate size={32} py={16} mx="auto" />;
@@ -52,34 +43,34 @@ export default function DataBrowser() {
   }
 
   return (
-    <>
-      <Box p={4}>
-        {pageData.categories.map(({ name, files }) => (
-          <Box mb={8} key={name}>
+    <Box p={4} flex={1}>
+      {pageData.categories.map(({ name, files }) => {
+        const gridItems = [
+          // If the array is empty, we insert placeholders that give Skeletons size
+          ...(files?.length > 0 ? files : placeholders),
+          // We want ~1 row of empty items to ensure none of the file panels gets stretched
+          ...Array(5),
+        ];
+
+        return (
+          <Box mb={32} key={name}>
             <Heading mb={4}>{name}</Heading>
-            <SimpleGrid spacing={10} columns={3}>
-              {(files ?? []).map((file) => {
+            <SimpleGrid spacing={10} minChildWidth="250px">
+              {gridItems.map((file, i) => {
                 function onClick() {
-                  setActiveFile(file);
+                  dispatch(actions.setActiveFile(file));
                 }
 
-                return <File file={file} key={file.id} onClick={onClick} />;
+                return (
+                  <Skeleton isLoaded={files?.length > 0}>
+                    <File file={file} key={i} onClick={onClick} />
+                  </Skeleton>
+                );
               })}
             </SimpleGrid>
           </Box>
-        ))}
-      </Box>
-
-      <Modal isOpen={activeFile} onClose={handleOnClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{activeFile?.name}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            {activeFile && <FileSpotlight file={activeFile} />}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </>
+        );
+      })}
+    </Box>
   );
 }

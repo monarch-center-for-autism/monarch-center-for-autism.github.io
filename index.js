@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
+import App from "./app";
 import Router from "./router";
 import { store } from "./store";
 import Fonts from "./structure/Fonts";
@@ -21,13 +22,7 @@ ReactDOM.render(
     <Provider store={store}>
       <Fonts />
       <BrowserRouter>
-        <Flex direction="column" minH="100vh">
-          <Header />
-          <Flex flex={1}>
-            <Sidebar />
-            <Router />
-          </Flex>
-        </Flex>
+        <App />
       </BrowserRouter>
     </Provider>
   </ChakraProvider>,
