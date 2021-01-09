@@ -62,8 +62,8 @@ export default function DataBrowser() {
                 }
 
                 return (
-                  <Skeleton isLoaded={files?.length > 0}>
-                    <File file={file} key={i} onClick={onClick} />
+                  <Skeleton isLoaded={files?.length > 0} key={i}>
+                    <File file={file} onClick={onClick} />
                   </Skeleton>
                 );
               })}
