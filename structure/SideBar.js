@@ -53,7 +53,7 @@ export default function Sidebar() {
       <Link as={StyledNavLink} to="/search" display="block" mb={2}>
         Search
       </Link>
-      <Divider borderColor="gray.300" my={4} />
+      <Divider borderColor="gray.400" my={4} />
       <Text color="gray.500" mb={2} textTransform="uppercase" fontSize="sm">
         Pages
       </Text>
