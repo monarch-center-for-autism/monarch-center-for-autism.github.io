@@ -63,35 +63,38 @@ function getId(file) {
 
 export async function getSiteStructure() {
   const pagesResponse = await window.gapi.client.drive.files.list({
+    pageSize: 1000,
     q: `${IsFolder} and '${process.env.FOLDER_ID}' in parents`,
     fields: "files(id, name, shortcutDetails)",
   });
 
-  const pageStructure = await Promise.all(
-    pagesResponse.result.files.map(async (folder) => {
-      const categoriesResponse = await window.gapi.client.drive.files.list({
-        q: `${IsFolder} and '${getId(folder)}' in parents`,
-        fields: `files(id, name, shortcutDetails)`,
-      });
+  return pagesResponse.result.files;
+}
 
-      return {
-        ...folder,
-        categories: categoriesResponse.result.files,
-      };
-    })
-  );
+export async function getCategories(page) {
+  const response = await window.gapi.client.drive.files.list({
+    q: `${IsFolder} and '${getId(page)}' in parents`,
+    fields: `files(id, name, shortcutDetails, parents)`,
+  });
 
-  return pageStructure;
+  return response.result.files;
 }
 
 // Note - we don't need the page because folder IDs are globally unique in Drive
 export async function getFiles(category, pageToken) {
-  const response = await gapi.client.drive.files.list({
+  const files = await gapi.client.drive.files.list({
     pageToken,
     q: `mimeType != 'application/vnd.google-apps.folder' and '${category}' in parents`,
     spaces: "drive",
     fields: `nextPageToken, files(${FileProps})`,
   });
 
-  return response.result;
+  const folders = await gapi.client.drive.files.list({
+    pageToken,
+    q: `${IsFolder} and '${category}' in parents`,
+    spaces: "drive",
+    fields: `nextPageToken, files(id)`,
+  });
+
+  return [files.result, folders.result];
 }

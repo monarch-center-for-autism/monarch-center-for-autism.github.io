@@ -58,13 +58,13 @@ export default function Sidebar() {
         Pages
       </Text>
       <SkeletonText noOfLines={10} spacing={4} isLoaded={pages.length > 0}>
-        {pages.map(({ name }) => (
+        {pages.map(({ name, id }) => (
           <Link
             as={StyledNavLink}
-            to={`/${name.toLowerCase()}`}
+            to={`/${id}`}
             display="block"
             mb={2}
-            key={name}
+            key={id}
           >
             {name}
           </Link>

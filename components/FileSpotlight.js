@@ -24,13 +24,14 @@ export default function FileSpotlight({ file }) {
     <Flex direction="column" h="full">
       {description && <Text mb={8}>{description}</Text>}
 
-      <ButtonGroup mb={4}>
+      <ButtonGroup mb={4} flexWrap="wrap">
         {downloadOptions.map(([mimeType, url]) => (
           <Button
             href={url}
             key={mimeType}
             as={Link}
             leftIcon={<FontAwesomeIcon icon={faDownload} />}
+            my={2}
           >
             Download as {mimeTypes(mimeType)}
           </Button>

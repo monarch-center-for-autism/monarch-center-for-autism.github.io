@@ -7,9 +7,9 @@ import {
   ModalOverlay,
 } from "@chakra-ui/react";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import FileSpotlight from "./FileSpotlight";
-import { actions } from "../store";
+import { actions, useSelector } from "../store";
 
 export default function FileModal() {
   const activeFile = useSelector((state) => state.activeFile);
