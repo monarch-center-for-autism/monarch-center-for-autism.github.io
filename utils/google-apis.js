@@ -61,21 +61,9 @@ function getId(file) {
   return file.shortcutDetails?.targetId ?? file.id;
 }
 
-async function getRootFolderId() {
-  const response = await window.gapi.client.drive.files.list({
-    q: `${IsFolder} and id = '${process.env.FOLDER_ID}'`,
-    spaces: "drive",
-    fields: "files(id, shortcutDetails)",
-  });
-
-  const [{ id }] = response.result.files;
-  return id;
-}
-
 export async function getSiteStructure() {
-  const rootFolderId = await getRootFolderId();
   const pagesResponse = await window.gapi.client.drive.files.list({
-    q: `${IsFolder} and '${rootFolderId}' in parents`,
+    q: `${IsFolder} and '${process.env.FOLDER_ID}' in parents`,
     fields: "files(id, name, shortcutDetails)",
   });
 
