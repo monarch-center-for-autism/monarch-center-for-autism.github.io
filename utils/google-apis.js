@@ -63,7 +63,7 @@ function getId(file) {
 
 async function getRootFolderId() {
   const response = await window.gapi.client.drive.files.list({
-    q: `${IsFolder} and name = 'Monarch Website'`,
+    q: `${IsFolder} and id = '${process.env.FOLDER_ID}'`,
     spaces: "drive",
     fields: "files(id, shortcutDetails)",
   });
