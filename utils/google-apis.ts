@@ -1,3 +1,5 @@
+import { Folder, File, Paged } from "../types";
+
 const DISCOVERY_DOCS = [
   "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
 ];
@@ -6,8 +8,16 @@ const SCOPES = [
   "https://www.googleapis.com/auth/userinfo.profile",
 ].join(" ");
 
-const IsFolder =
-  "(mimeType = 'application/vnd.google-apps.folder' or mimeType = 'application/vnd.google-apps.shortcut')";
+function isFolder(b) {
+  const op = b ? "=" : "!=";
+  const combiner = b ? "or" : "and";
+
+  return (
+    `(mimeType ${op} 'application/vnd.google-apps.folder' ${combiner}` +
+    ` mimeType ${op} 'application/vnd.google-apps.shortcut')`
+  );
+}
+
 const FileProps = [
   "id",
   "name",
@@ -61,37 +71,43 @@ function getId(file) {
   return file.shortcutDetails?.targetId ?? file.id;
 }
 
-export async function getSiteStructure() {
+export async function getRootFolders(): Promise<Folder[]> {
   const pagesResponse = await window.gapi.client.drive.files.list({
     pageSize: 1000,
-    q: `${IsFolder} and '${process.env.FOLDER_ID}' in parents`,
+    q: `${isFolder(true)} and '${process.env.FOLDER_ID}' in parents`,
     fields: "files(id, name, shortcutDetails)",
   });
 
   return pagesResponse.result.files;
 }
 
-export async function getCategories(page) {
+export async function getFolders(page: Folder): Promise<Folder[]> {
   const response = await window.gapi.client.drive.files.list({
-    q: `${IsFolder} and '${getId(page)}' in parents`,
-    fields: `files(id, name, shortcutDetails, parents)`,
+    pageSize: 1000,
+    q: `${isFolder(true)} and '${getId(page)}' in parents`,
+    fields: `files(id, name, shortcutDetails)`,
   });
 
   return response.result.files;
 }
 
-// Note - we don't need the page because folder IDs are globally unique in Drive
-export async function getFiles(category, pageToken) {
+export async function getFiles(
+  folder: Folder,
+  pageToken?: string
+): Promise<[Paged<File>, Paged<Folder>]> {
+  const folderId = getId(folder);
+
   const files = await gapi.client.drive.files.list({
     pageToken,
-    q: `mimeType != 'application/vnd.google-apps.folder' and '${category}' in parents`,
+    pageSize: 10,
+    q: `${isFolder(false)} and '${folderId}' in parents and trashed = false`,
     spaces: "drive",
     fields: `nextPageToken, files(${FileProps})`,
   });
 
   const folders = await gapi.client.drive.files.list({
     pageToken,
-    q: `${IsFolder} and '${category}' in parents`,
+    q: `${isFolder} and '${folder}' in parents`,
     spaces: "drive",
     fields: `nextPageToken, files(id)`,
   });

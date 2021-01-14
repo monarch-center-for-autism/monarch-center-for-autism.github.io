@@ -1,4 +1,4 @@
-export default function getHumanReadableMimeType(mimeType) {
+export default function getHumanReadableMimeType(mimeType: string): string {
   switch (mimeType) {
     case "pdf":
     case "application/pdf":

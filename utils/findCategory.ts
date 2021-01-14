@@ -1,4 +1,7 @@
-export default function findCategory(pages, categoryId) {
+export default function findCategory(
+  pages,
+  categoryId: string
+): [number, number] {
   const pageIndex = pages.findIndex((p) =>
     p.categories.find(({ id }) => id === categoryId)
   );

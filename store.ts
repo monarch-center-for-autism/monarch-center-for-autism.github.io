@@ -4,46 +4,59 @@ import {
   createSlice,
 } from "@reduxjs/toolkit";
 import {
-  useSelector as useUntypedSelector,
   TypedUseSelectorHook,
+  useSelector as useUntypedSelector,
 } from "react-redux";
+import { Category, File, Folder, QueueFolder } from "./types";
+import { aFlatMap } from "./utils/aMap";
 import findCategory from "./utils/findCategory";
 import * as google from "./utils/google-apis";
 
-type Page = {
-  id: string;
-  name: string;
+type State = {
+  user: string;
+  pages: Folder[];
+  categories: Category[];
+  activeFile?: File;
 };
 
-type Category = {
-  pageId: string;
-  id: string;
-  name: string;
-  loading: boolean;
-  folders: {
-    id: string;
-    nextPageToken: string;
-  }[];
-  files: {
-    id: string;
-    name: string;
-  }[];
-};
+const fetchStructure = createAsyncThunk<
+  [Folder[], Category[]],
+  void,
+  { state: State }
+>("fetchData", async (_, __) => {
+  const pages = await google.getRootFolders();
+  const categories = await aFlatMap(pages, google.getFolders);
 
-const fetchStructure = createAsyncThunk("fetchData", async () => {
-  return await google.getSiteStructure();
+  return [pages, categories];
 });
 
-const fetchCategory = createAsyncThunk(
+type FetchCategory = {
+  files: File[];
+  folders: QueueFolder[];
+  listedFolderCount: number;
+};
+const fetchCategory = createAsyncThunk<FetchCategory, string, { state: State }>(
   "refreshData",
-  async (category: string, thunkAPI) => {
-    const pageToken = null; //thunkAPI
-    // .getState()
-    // .data.flatMap((d) => d.categories)
-    // .find((c) => c.id === category)?.nextPageToken;
-    const [files, folders] = await google.getFiles(category, pageToken);
+  async (category: string, thunkApi) => {
+    const { id, folders: queue } =
+      thunkApi.getState().categories.find((c) => c.id === category) ?? {};
+    if (queue.length === 0) {
+      queue.push({ id });
+    }
 
-    return { files, folders };
+    let listedFolderCount = 0;
+    const folders: QueueFolder[] = [];
+    const files: File[] = [];
+    for (
+      ;
+      listedFolderCount < queue.length && files.length < 10;
+      listedFolderCount++
+    ) {
+      const folder = folders[listedFolderCount];
+      const [contents, queue] = await google.getFiles(folder);
+    }
+
+    return { files, folders, listedFolderCount };
   }
 );
 
@@ -51,7 +64,7 @@ const { actions, reducer } = createSlice({
   name: "data",
   initialState: {
     user: "",
-    pages: <Page[]>[],
+    pages: <Folder[]>[],
     categories: <Category[]>[],
     activeFile: null,
   },
@@ -99,8 +112,7 @@ const { actions, reducer } = createSlice({
 });
 
 const store = configureStore({ reducer });
-const useSelector: TypedUseSelectorHook<
-  ReturnType<typeof store.getState>
-> = useUntypedSelector;
+
+const useSelector: TypedUseSelectorHook<State> = useUntypedSelector;
 
 export { actions, store, fetchStructure, fetchCategory, useSelector };
