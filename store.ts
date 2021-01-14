@@ -7,9 +7,8 @@ import {
   TypedUseSelectorHook,
   useSelector as useUntypedSelector,
 } from "react-redux";
-import { Category, File, Folder, QueueFolder } from "./types";
+import { Category, File, Folder, QueueFolder } from "./types/types";
 import { aFlatMap } from "./utils/aMap";
-import findCategory from "./utils/findCategory";
 import * as google from "./utils/google-apis";
 
 type State = {
@@ -19,16 +18,24 @@ type State = {
   activeFile?: File;
 };
 
-const fetchStructure = createAsyncThunk<
-  [Folder[], Category[]],
-  void,
-  { state: State }
->("fetchData", async (_, __) => {
-  const pages = await google.getRootFolders();
-  const categories = await aFlatMap(pages, google.getFolders);
+type FetchStructure = { pages: Folder[]; categories: Category[] };
+const fetchStructure = createAsyncThunk<FetchStructure, void, {}>(
+  "fetchData",
+  async () => {
+    const pages = await google.getRootFolders();
+    const categories = await aFlatMap(pages, async (page) => {
+      return (await google.getFolders(page)).map((category) => ({
+        ...category,
+        loading: false,
+        folders: [],
+        pageId: page.id,
+        files: [],
+      }));
+    });
 
-  return [pages, categories];
-});
+    return { pages, categories };
+  }
+);
 
 type FetchCategory = {
   files: File[];
@@ -38,25 +45,44 @@ type FetchCategory = {
 const fetchCategory = createAsyncThunk<FetchCategory, string, { state: State }>(
   "refreshData",
   async (category: string, thunkApi) => {
-    const { id, folders: queue } =
+    const { id, folders: previousQueue } =
       thunkApi.getState().categories.find((c) => c.id === category) ?? {};
-    if (queue.length === 0) {
-      queue.push({ id });
-    }
 
     let listedFolderCount = 0;
-    const folders: QueueFolder[] = [];
+    const newQueue: QueueFolder[] = [];
     const files: File[] = [];
-    for (
-      ;
-      listedFolderCount < queue.length && files.length < 10;
-      listedFolderCount++
-    ) {
-      const folder = folders[listedFolderCount];
-      const [contents, queue] = await google.getFiles(folder);
+
+    if (previousQueue.length === 0) {
+      newQueue.push({ id });
     }
 
-    return { files, folders, listedFolderCount };
+    let folder;
+    if (previousQueue.length > listedFolderCount) {
+      folder = previousQueue[listedFolderCount++];
+    } else {
+      folder = newQueue.splice(0, 1);
+    }
+
+    while (folder != null && files.length < 10) {
+      const [contents, folders] = await google.getFiles(folder);
+
+      files.push(...contents.files);
+      newQueue.splice(0, 0, ...folders);
+      if (contents.nextPageToken) {
+        newQueue.splice(0, 0, {
+          ...folder,
+          nextPageToken: contents.nextPageToken,
+        });
+      }
+
+      if (previousQueue.length > listedFolderCount) {
+        folder = previousQueue[listedFolderCount++];
+      } else {
+        folder = newQueue.splice(0, 1);
+      }
+    }
+
+    return { files, folders: newQueue, listedFolderCount };
   }
 );
 
@@ -78,34 +104,34 @@ const { actions, reducer } = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(fetchStructure.fulfilled, (state, { payload }) => {
-      state.pages = payload;
+      const { categories, pages } = payload;
+      state.pages = pages;
+      state.categories = categories;
     });
     builder.addCase(
       fetchCategory.pending,
       (state, { meta: { arg: category } }) => {
-        const [pageIndex, categoryIndex] = findCategory(state.data, category);
-        state.data[pageIndex].categories[categoryIndex].files = [];
+        const i = state.categories.findIndex((c) => c.id === category);
+        state.categories[i].loading = true;
       }
     );
     builder.addCase(
       fetchCategory.fulfilled,
       (state, { payload, meta: { arg: category } }) => {
-        const { category, files, nextPageToken } = payload;
-        const [pageIndex, categoryIndex] = findCategory(state.data, category);
+        const { files, folders, listedFolderCount } = payload;
+        const i = state.categories.findIndex((c) => c.id === category);
 
-        state.data[pageIndex].categories[
-          categoryIndex
-        ].nextPageToken = nextPageToken;
-
-        state.data[pageIndex].categories[categoryIndex].files.push(...files);
+        state.categories[i].files.push(...files);
+        state.categories[i].folders.splice(0, listedFolderCount, ...folders);
+        state.categories[i].loading = false;
       }
     );
 
     builder.addCase(
       fetchCategory.rejected,
       (state, { meta: { arg: category } }) => {
-        const [pageIndex, categoryIndex] = findCategory(state.data, category);
-        state.data[pageIndex].categories[categoryIndex].files = [];
+        const i = state.categories.findIndex((c) => c.id === category);
+        state.categories[i].loading = false;
       }
     );
   },

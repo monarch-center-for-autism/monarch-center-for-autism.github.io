@@ -1,4 +1,4 @@
-import { Folder, File, Paged } from "../types";
+import { Folder, FileList } from "../types/types";
 
 const DISCOVERY_DOCS = [
   "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
@@ -33,6 +33,8 @@ const FileProps = [
   "properties",
   "mimeType",
 ].join(", ");
+
+const FolderProps = ["id", "name", "shortcutDetails"].join(", ");
 
 export async function initGoogleClient() {
   await new Promise((resolve) => window.gapi.load("client:auth2", resolve));
@@ -75,7 +77,7 @@ export async function getRootFolders(): Promise<Folder[]> {
   const pagesResponse = await window.gapi.client.drive.files.list({
     pageSize: 1000,
     q: `${isFolder(true)} and '${process.env.FOLDER_ID}' in parents`,
-    fields: "files(id, name, shortcutDetails)",
+    fields: `files(${FolderProps})`,
   });
 
   return pagesResponse.result.files;
@@ -85,7 +87,7 @@ export async function getFolders(page: Folder): Promise<Folder[]> {
   const response = await window.gapi.client.drive.files.list({
     pageSize: 1000,
     q: `${isFolder(true)} and '${getId(page)}' in parents`,
-    fields: `files(id, name, shortcutDetails)`,
+    fields: `files(${FolderProps})`,
   });
 
   return response.result.files;
@@ -94,23 +96,23 @@ export async function getFolders(page: Folder): Promise<Folder[]> {
 export async function getFiles(
   folder: Folder,
   pageToken?: string
-): Promise<[Paged<File>, Paged<Folder>]> {
-  const folderId = getId(folder);
-
+): Promise<[FileList, Folder[]]> {
+  const inFolder = `'${getId(folder)}' in parents`;
   const files = await gapi.client.drive.files.list({
     pageToken,
     pageSize: 10,
-    q: `${isFolder(false)} and '${folderId}' in parents and trashed = false`,
+    q: `${isFolder(false)} and ${inFolder} and trashed = false`,
     spaces: "drive",
     fields: `nextPageToken, files(${FileProps})`,
   });
 
   const folders = await gapi.client.drive.files.list({
     pageToken,
-    q: `${isFolder} and '${folder}' in parents`,
+    pageSize: 1000,
+    q: `${isFolder(true)} and '${folder}' in parents`,
     spaces: "drive",
-    fields: `nextPageToken, files(id)`,
+    fields: `files(${FolderProps})`,
   });
 
-  return [files.result, folders.result];
+  return [files.result, folders.result.files];
 }

@@ -1,9 +1,15 @@
 import { Box, Image, Text } from "@chakra-ui/react";
 import React from "react";
+import { File } from "../types/types";
 
-export default function File({ file, onClick }) {
-  if (!file) return <div />;
-  if (file.id === "placeholder") return <Box h={60} w={60} />;
+type Props = {
+  file: File;
+  key?: any;
+  onClick: () => any;
+};
+export default function File({ file, onClick, key }: Props) {
+  if (!file) return <div key={key} />;
+  if (file.id === "placeholder") return <Box h={60} w={60} key={key} />;
 
   const { name, iconLink, thumbnailLink, description } = file;
   return (
@@ -20,6 +26,7 @@ export default function File({ file, onClick }) {
       h={60}
       position="relative"
       overflow="hidden"
+      key={key}
     >
       <Image src={thumbnailLink} alt="" position="absolute" w="full" h="auto" />
 

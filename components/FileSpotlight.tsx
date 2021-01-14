@@ -1,6 +1,6 @@
 import { Button, ButtonGroup, Link, Text, Flex } from "@chakra-ui/react";
 import React from "react";
-import mimeTypes from "../utils/mimeTypes";
+import mimeTypes from "../utils/mime-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 

@@ -1,6 +1,5 @@
-declare module "*.png";
-
 export type File = gapi.client.drive.File;
+export type FileList = gapi.client.drive.FileList;
 
 export type Folder = Pick<File, "id" | "name" | "shortcutDetails">;
 
@@ -13,9 +12,4 @@ export type Category = Folder & {
   loading: boolean;
   folders: QueueFolder[];
   files: File[];
-};
-
-export type Paged<T> = {
-  nextPageToken?: string;
-  files: T[];
 };
