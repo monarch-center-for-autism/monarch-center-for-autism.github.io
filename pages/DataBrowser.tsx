@@ -6,45 +6,47 @@ import {
   Skeleton,
 } from "@chakra-ui/react";
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import File from "../components/File";
 import PageNotFound from "./PageNotFound";
-import { fetchCategory, actions } from "../store";
+import { fetchCategory, actions, useSelector } from "../store";
+import { Folder } from "../types/types";
 
 const placeholders = Array(5).fill({ id: "placeholder" });
 
+function matches({ id, name }: Folder, q: string): boolean {
+  return new RegExp(id).test(q) || new RegExp(name, "i").test(q);
+}
+
 export default function DataBrowser() {
   const { page } = useParams();
-  const allData = useSelector((state) => state.data);
   const dispatch = useDispatch();
 
-  const pageData = allData.find(
-    ({ id, name }) =>
-      new RegExp(id).test(page) || new RegExp(name, "i").test(page)
+  const pages = useSelector((state) => state.pages);
+  const { id: pageId } = pages.find((p) => matches(p, page)) ?? {};
+
+  const categories = useSelector((state) => state.categories).filter(
+    (c) => c.pageId === pageId
   );
 
   useEffect(() => {
-    if (!pageData) return;
+    categories
+      .filter((c) => c.pageId === pageId && c.files.length === 0)
+      .forEach(({ id }) => dispatch(fetchCategory(id)));
+  }, [categories.length]);
 
-    pageData.categories.forEach(({ id, files }) => {
-      if (!files) {
-        dispatch(fetchCategory(id));
-      }
-    });
-  }, [pageData]);
-
-  if (allData.length === 0) {
+  if (pages.length === 0) {
     return <CircularProgress isIndeterminate size={32} py={16} mx="auto" />;
   }
 
-  if (!pageData) {
+  if (!pageId) {
     return <PageNotFound page={page} />;
   }
 
   return (
     <Box p={4} flex={1}>
-      {pageData.categories.map(({ name, files }) => {
+      {categories.map(({ name, files }) => {
         const gridItems = [
           // If the array is empty, we insert placeholders that give Skeletons size
           ...(files?.length > 0 ? files : placeholders),

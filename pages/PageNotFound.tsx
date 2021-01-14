@@ -5,8 +5,8 @@ import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
 
 export default function PageNotFound({ page }) {
-  const pages = useSelector((state) => state.data);
-  const fuse = new Fuse(pages, { keys: ["name"] });
+  const pages = useSelector((state) => state.pages);
+  const fuse = new Fuse(pages ?? [], { keys: ["name"] });
 
   const similarPages = fuse.search(page, { limit: 3 }).map((x) => x.item);
 

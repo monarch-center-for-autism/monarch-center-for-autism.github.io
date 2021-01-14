@@ -12,7 +12,7 @@ import { aFlatMap } from "./utils/aMap";
 import * as google from "./utils/google-apis";
 
 type State = {
-  user: string;
+  user?: gapi.auth2.GoogleUser;
   pages: Folder[];
   categories: Category[];
   activeFile?: File;
@@ -60,7 +60,7 @@ const fetchCategory = createAsyncThunk<FetchCategory, string, { state: State }>(
     if (previousQueue.length > listedFolderCount) {
       folder = previousQueue[listedFolderCount++];
     } else {
-      folder = newQueue.splice(0, 1);
+      folder = newQueue.splice(0, 1)[0];
     }
 
     while (folder != null && files.length < 10) {
@@ -78,7 +78,7 @@ const fetchCategory = createAsyncThunk<FetchCategory, string, { state: State }>(
       if (previousQueue.length > listedFolderCount) {
         folder = previousQueue[listedFolderCount++];
       } else {
-        folder = newQueue.splice(0, 1);
+        folder = newQueue.splice(0, 1)[0];
       }
     }
 
@@ -89,7 +89,7 @@ const fetchCategory = createAsyncThunk<FetchCategory, string, { state: State }>(
 const { actions, reducer } = createSlice({
   name: "data",
   initialState: {
-    user: "",
+    user: null,
     pages: <Folder[]>[],
     categories: <Category[]>[],
     activeFile: null,

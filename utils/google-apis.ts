@@ -76,7 +76,7 @@ function getId(file) {
 export async function getRootFolders(): Promise<Folder[]> {
   const pagesResponse = await window.gapi.client.drive.files.list({
     pageSize: 1000,
-    q: `${isFolder(true)} and '${process.env.FOLDER_ID}' in parents`,
+    q: [isFolder(true), `'${process.env.FOLDER_ID}' in parents`].join(" and "),
     fields: `files(${FolderProps})`,
   });
 
@@ -86,7 +86,7 @@ export async function getRootFolders(): Promise<Folder[]> {
 export async function getFolders(page: Folder): Promise<Folder[]> {
   const response = await window.gapi.client.drive.files.list({
     pageSize: 1000,
-    q: `${isFolder(true)} and '${getId(page)}' in parents`,
+    q: [isFolder(true), `'${getId(page)}' in parents`].join(" and "),
     fields: `files(${FolderProps})`,
   });
 
@@ -101,7 +101,7 @@ export async function getFiles(
   const files = await gapi.client.drive.files.list({
     pageToken,
     pageSize: 10,
-    q: `${isFolder(false)} and ${inFolder} and trashed = false`,
+    q: [isFolder(false), inFolder, "trashed = false"].join(" and "),
     spaces: "drive",
     fields: `nextPageToken, files(${FileProps})`,
   });
@@ -109,7 +109,7 @@ export async function getFiles(
   const folders = await gapi.client.drive.files.list({
     pageToken,
     pageSize: 1000,
-    q: `${isFolder(true)} and '${folder}' in parents`,
+    q: [isFolder(true), `'${getId(folder)}' in parents`].join(" and "),
     spaces: "drive",
     fields: `files(${FolderProps})`,
   });

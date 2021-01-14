@@ -1,18 +1,16 @@
 import { Flex, Text, Input, SimpleGrid } from "@chakra-ui/react";
 import Fuse from "fuse.js";
 import React, { useEffect, useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import File from "../components/File";
-import { actions, fetchCategory } from "../store";
+import { actions, fetchCategory, useSelector } from "../store";
 
 const fuse = new Fuse([], { keys: ["name"] });
 
 export default function Search() {
   const [query, setQuery] = useState("");
-  const pages = useSelector((state) => state.data);
-  const data = useSelector((state) => state.data)
-    .flatMap((page) => page.categories)
-    .flatMap((category) => category.files);
+  const categories = useSelector((state) => state.categories);
+  const data = categories.flatMap((category) => category.files);
   const dispatch = useDispatch();
 
   const results = useMemo(() => {
@@ -23,14 +21,10 @@ export default function Search() {
   // In the future, search what's already downloaded at a higher weight,
   // then search the google api
   useEffect(() => {
-    pages
-      .flatMap((p) => p.categories)
-      .forEach((c) => {
-        if (!c.files) {
-          dispatch(fetchCategory(c.id));
-        }
-      });
-  }, [pages]);
+    categories
+      .filter((c) => c.files.length === 0)
+      .forEach((c) => dispatch(fetchCategory(c.id)));
+  }, [categories.length]);
 
   useEffect(() => {
     fuse.setCollection(data);
