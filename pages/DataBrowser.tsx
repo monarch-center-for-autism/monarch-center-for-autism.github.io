@@ -37,7 +37,7 @@ export default function DataBrowser() {
 
   return (
     <Box p={4} flex={1}>
-      <Tabs variant="soft-rounded" colorScheme="purple">
+      <Tabs variant="soft-rounded" colorScheme="purple" size="lg">
         <TabList flexWrap="wrap">
           {categories.map((c) => (
             <Tab key={c.id}>{c.name}</Tab>

@@ -7,6 +7,8 @@ export type QueueFolder = Pick<File, "id" | "shortcutDetails"> & {
   nextPageToken?: string;
 };
 
+export type Subcategory = {};
+
 export type Category = Folder & {
   pageId: string;
   loading: boolean;

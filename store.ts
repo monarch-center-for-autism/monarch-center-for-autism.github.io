@@ -23,17 +23,22 @@ const fetchStructure = createAsyncThunk<FetchStructure, void, {}>(
   "fetchData",
   async () => {
     const pages = await google.getRootFolders();
-    const categories = await aFlatMap(pages, async (page) => {
-      return (await google.getFolders(page)).map((category) => ({
-        ...category,
-        loading: false,
-        folders: [],
-        pageId: page.id,
-        files: [],
-        // TODO: make...another layer of promises for this?
-        subcategories: [],
-      }));
-    });
+    const categories = await aFlatMap(
+      pages,
+      async (page) =>
+        await Promise.all(
+          (await google.getFolders(page)).map(async (category) => {
+            return {
+              ...category,
+              loading: false,
+              folders: [],
+              pageId: page.id,
+              files: [],
+              subcategories: await google.getFolders(category),
+            };
+          })
+        )
+    );
 
     return { pages, categories };
   }
