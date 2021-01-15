@@ -1,6 +1,7 @@
 import { Box, Image, Text } from "@chakra-ui/react";
 import React from "react";
 import { File } from "../types/types";
+import useExponentialBackoff from "../utils/useExponentialBackoff";
 
 type Props = {
   file: File;
@@ -8,10 +9,14 @@ type Props = {
   onClick: () => any;
 };
 export default function File({ file, onClick, key }: Props) {
+  const { name, iconLink, thumbnailLink, description } = file ?? {};
+  const [thumbnailSource, onThumbnailError] = useExponentialBackoff(
+    thumbnailLink ?? ""
+  );
+
   if (!file) return <div key={key} />;
   if (file.id === "placeholder") return <Box h={60} w={60} key={key} />;
 
-  const { name, iconLink, thumbnailLink, description } = file;
   return (
     <Box
       shadow="md"
@@ -28,7 +33,14 @@ export default function File({ file, onClick, key }: Props) {
       overflow="hidden"
       key={key}
     >
-      <Image src={thumbnailLink} alt="" position="absolute" w="full" h="auto" />
+      <Image
+        src={thumbnailSource}
+        onError={onThumbnailError}
+        alt=""
+        position="absolute"
+        w="full"
+        h="auto"
+      />
 
       <Box
         p={4}
