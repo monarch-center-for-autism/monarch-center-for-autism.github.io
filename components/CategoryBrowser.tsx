@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Box, Heading, SimpleGrid, Skeleton } from "@chakra-ui/react";
+import { Heading, SimpleGrid, Skeleton } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import { actions, fetchCategory } from "../store";
 import { Category } from "../types/types";
@@ -32,7 +32,7 @@ export default function CategoryBrowser({ category }: Props) {
   ]);
 
   return (
-    <Box mb={32} key={id}>
+    <>
       {Object.entries(filesWithPaddedValues).map(([header, gridItems], i) => (
         <React.Fragment key={i}>
           {header !== "undefined" && <Heading mb={4}>{header}</Heading>}
@@ -51,6 +51,6 @@ export default function CategoryBrowser({ category }: Props) {
           </SimpleGrid>
         </React.Fragment>
       ))}
-    </Box>
+    </>
   );
 }

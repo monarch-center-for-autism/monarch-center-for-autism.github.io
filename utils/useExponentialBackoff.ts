@@ -3,7 +3,7 @@ import { useState } from "react";
 export default function useExponentialBackoff(
   src: string
 ): [string, () => void] {
-  const [url, setUrl] = useState(src + "?r=0");
+  const [url, setUrl] = useState(src + "&r=0");
   const [backoffAmount, setBackoffAmount] = useState(0);
 
   function onError() {

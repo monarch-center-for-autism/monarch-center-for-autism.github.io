@@ -1,9 +1,6 @@
 import {
   Box,
-  Heading,
-  SimpleGrid,
   CircularProgress,
-  Skeleton,
   Tabs,
   TabList,
   TabPanels,
@@ -40,8 +37,8 @@ export default function DataBrowser() {
 
   return (
     <Box p={4} flex={1}>
-      <Tabs variant="soft-rounded" colorScheme="green">
-        <TabList>
+      <Tabs variant="soft-rounded" colorScheme="purple">
+        <TabList flexWrap="wrap">
           {categories.map((c) => (
             <Tab key={c.id}>{c.name}</Tab>
           ))}

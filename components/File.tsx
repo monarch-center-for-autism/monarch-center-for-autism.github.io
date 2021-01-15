@@ -2,6 +2,7 @@ import { Box, Image, Text } from "@chakra-ui/react";
 import React from "react";
 import { File } from "../types/types";
 import useExponentialBackoff from "../utils/useExponentialBackoff";
+import useRealSize from "../utils/useRealSize";
 
 type Props = {
   file: File;
@@ -9,10 +10,11 @@ type Props = {
   onClick: () => any;
 };
 export default function File({ file, onClick, key }: Props) {
-  const { name, iconLink, thumbnailLink, description } = file ?? {};
-  const [thumbnailSource, onThumbnailError] = useExponentialBackoff(
-    thumbnailLink ?? ""
-  );
+  const { name, iconLink, thumbnailLink = "", description } = file ?? {};
+
+  const [width, height, ref] = useRealSize();
+  const sizedLink = thumbnailLink + `?sz=w${width}h${height}`;
+  const [thumbnailSource, onError] = useExponentialBackoff(sizedLink);
 
   if (!file) return <div key={key} />;
   if (file.id === "placeholder") return <Box h={60} w={60} key={key} />;
@@ -35,11 +37,12 @@ export default function File({ file, onClick, key }: Props) {
     >
       <Image
         src={thumbnailSource}
-        onError={onThumbnailError}
+        onError={onError}
         alt=""
         position="absolute"
         w="full"
         h="auto"
+        ref={ref}
       />
 
       <Box

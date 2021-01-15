@@ -8,7 +8,7 @@ import Sidebar from "./structure/SideBar";
 export default function App() {
   return (
     <>
-      <Flex direction="column" minH="100vh">
+      <Flex direction="column" h="100vh">
         <Header />
         <Flex flex={1}>
           <Sidebar />
