@@ -11,5 +11,6 @@ export type Category = Folder & {
   pageId: string;
   loading: boolean;
   folders: QueueFolder[];
+  subcategories: Folder[];
   files: File[];
 };

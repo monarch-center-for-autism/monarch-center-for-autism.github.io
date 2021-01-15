@@ -30,6 +30,8 @@ const fetchStructure = createAsyncThunk<FetchStructure, void, {}>(
         folders: [],
         pageId: page.id,
         files: [],
+        // TODO: make...another layer of promises for this?
+        subcategories: [],
       }));
     });
 
