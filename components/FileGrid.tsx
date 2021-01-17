@@ -45,8 +45,8 @@ export default function FileGrid({
         return <File file={file} onClick={onClick} key={i} />;
       })}
       {loading &&
-        Array(files.length === 0 ? 5 : 20).map((_, j) => (
-          <Skeleton key={j}>
+        Array(files.length === 0 ? 5 : 20).map((_, i) => (
+          <Skeleton key={i}>
             <Box h={60} w={60} />
           </Skeleton>
         ))}
@@ -65,6 +65,7 @@ export default function FileGrid({
           cursor="pointer"
           borderWidth="1px"
           onClick={loadMoreFiles}
+          h={60}
         >
           <FontAwesomeIcon
             icon={faChevronCircleRight}
@@ -73,6 +74,12 @@ export default function FileGrid({
           <Text mt={4}>See More Files</Text>
         </Flex>
       )}
+      {/* Keeps the see more files button from stretching */}
+      {Array(5)
+        .fill({})
+        .map((_, i) => (
+          <div key={i} />
+        ))}
     </SimpleGrid>
   );
 }

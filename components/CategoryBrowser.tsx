@@ -13,17 +13,15 @@ export default function CategoryBrowser({ category }: Props) {
 
   return (
     <>
-      {files.length > 0 && (
-        <Box mb={8}>
-          <FileGrid
-            files={files}
-            loading={loading}
-            queue={queue}
-            folderId={id}
-            isSubcategory={false}
-          />
-        </Box>
-      )}
+      <Box mb={files.length > 0 ? 8 : 0}>
+        <FileGrid
+          files={files}
+          loading={loading}
+          queue={queue}
+          folderId={id}
+          isSubcategory={false}
+        />
+      </Box>
       {subcategories.map((s, i) => (
         <Box mb={8} key={i}>
           <Heading mb={4}>{s.name}</Heading>
