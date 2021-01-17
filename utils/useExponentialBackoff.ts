@@ -3,8 +3,8 @@ import { useState } from "react";
 export default function useExponentialBackoff(
   src: string
 ): [string, () => void] {
-  const [url, setUrl] = useState(src + "&r=0");
-  const [backoffAmount, setBackoffAmount] = useState(0);
+  const [url, setUrl] = useState(src + "&r=9");
+  const [backoffAmount, setBackoffAmount] = useState(9);
 
   function onError() {
     function tryAgain() {
@@ -12,7 +12,7 @@ export default function useExponentialBackoff(
       setBackoffAmount(backoffAmount + 1);
     }
 
-    setTimeout(tryAgain, Math.random() * Math.pow(2, backoffAmount));
+    setTimeout(tryAgain, Math.pow(2, backoffAmount));
   }
 
   return [url, onError];

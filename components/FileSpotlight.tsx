@@ -1,8 +1,8 @@
-import { Button, ButtonGroup, Link, Text, Flex } from "@chakra-ui/react";
+import { Button, ButtonGroup, Flex, Link, Text } from "@chakra-ui/react";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import mimeTypes from "../utils/mime-types";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
 export default function FileSpotlight({ file }) {
   if (!file) return null;

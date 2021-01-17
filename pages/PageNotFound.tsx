@@ -1,8 +1,8 @@
-import { Flex, Heading, Text, VStack, Link } from "@chakra-ui/react";
+import { Flex, Heading, Link, Text, VStack } from "@chakra-ui/react";
 import Fuse from "fuse.js";
 import React from "react";
-import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
+import { useSelector } from "../store";
 
 export default function PageNotFound({ page }) {
   const pages = useSelector((state) => state.pages);

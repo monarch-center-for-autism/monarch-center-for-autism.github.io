@@ -1,4 +1,4 @@
-import { Folder, FileList } from "../types/types";
+import { Folder, FileList, QueueFolder } from "../types/types";
 
 const DISCOVERY_DOCS = [
   "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
@@ -78,6 +78,8 @@ export async function getRootFolders(): Promise<Folder[]> {
     pageSize: 1000,
     q: [isFolder(true), `'${process.env.FOLDER_ID}' in parents`].join(" and "),
     fields: `files(${FolderProps})`,
+    spaces: "drive",
+    orderBy: "name",
   });
 
   return pagesResponse.result.files;
@@ -88,30 +90,34 @@ export async function getFolders(page: Folder): Promise<Folder[]> {
     pageSize: 1000,
     q: [isFolder(true), `'${getId(page)}' in parents`].join(" and "),
     fields: `files(${FolderProps})`,
+    spaces: "drive",
+    orderBy: "name",
   });
 
   return response.result.files;
 }
 
 export async function getFiles(
-  folder: Folder,
-  pageToken?: string
+  folder: QueueFolder,
+  limit: number
 ): Promise<[FileList, Folder[]]> {
   const inFolder = `'${getId(folder)}' in parents`;
   const files = await gapi.client.drive.files.list({
-    pageToken,
-    pageSize: 10,
+    pageToken: folder.nextPageToken,
+    pageSize: limit,
     q: [isFolder(false), inFolder, "trashed = false"].join(" and "),
     spaces: "drive",
     fields: `nextPageToken, files(${FileProps})`,
+    orderBy: "name",
   });
 
   const folders = await gapi.client.drive.files.list({
-    pageToken,
+    pageToken: folder.nextPageToken,
     pageSize: 1000,
     q: [isFolder(true), `'${getId(folder)}' in parents`].join(" and "),
     spaces: "drive",
     fields: `files(${FolderProps})`,
+    orderBy: "name",
   });
 
   return [files.result, folders.result.files];
