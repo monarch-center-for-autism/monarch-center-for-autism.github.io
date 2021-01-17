@@ -1,5 +1,5 @@
 import React from "react";
-import { Heading } from "@chakra-ui/react";
+import { Heading, Box } from "@chakra-ui/react";
 import { useSelector } from "../store";
 import { Category } from "../types/types";
 import FileGrid from "./FileGrid";
@@ -13,23 +13,27 @@ export default function CategoryBrowser({ category }: Props) {
 
   return (
     <>
-      <FileGrid
-        files={files}
-        loading={loading}
-        queue={queue}
-        folderId={id}
-        isSubcategory={false}
-      />
+      {files.length > 0 && (
+        <Box mb={8}>
+          <FileGrid
+            files={files}
+            loading={loading}
+            queue={queue}
+            folderId={id}
+            isSubcategory={false}
+          />
+        </Box>
+      )}
       {subcategories.map((s, i) => (
-        <React.Fragment key={i}>
-          <Heading>{s.name}</Heading>
+        <Box mb={8} key={i}>
+          <Heading mb={4}>{s.name}</Heading>
           <FileGrid
             folderId={s.id}
             queue={s.queue}
             files={s.files}
             loading={s.loading}
           />
-        </React.Fragment>
+        </Box>
       ))}
     </>
   );

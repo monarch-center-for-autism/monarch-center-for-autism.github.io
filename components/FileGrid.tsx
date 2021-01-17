@@ -1,4 +1,4 @@
-import { Flex, SimpleGrid, Skeleton, Text } from "@chakra-ui/react";
+import { Box, Flex, SimpleGrid, Skeleton, Text } from "@chakra-ui/react";
 import { faChevronCircleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDispatch } from "react-redux";
@@ -22,13 +22,6 @@ export default function FileGrid({
   isSubcategory = true,
 }: Props) {
   const dispatch = useDispatch();
-  const gridItems = [
-    ...files,
-    // If the array is empty, we insert placeholders that give Skeletons size
-    // Either way, we want ~1 row of empty items to ensure none of the file panels
-    // gets stretched
-    ...Array(5).fill(loading ? { id: "placeholder" } : undefined),
-  ];
 
   function loadMoreFiles() {
     dispatch(
@@ -44,17 +37,19 @@ export default function FileGrid({
 
   return (
     <SimpleGrid spacing={10} minChildWidth="250px">
-      {gridItems.map((file, j) => {
+      {files.map((file, i) => {
         function onClick() {
           dispatch(actions.setActiveFile(file));
         }
 
-        return (
-          <Skeleton isLoaded={!loading} key={j}>
-            <File file={file} onClick={onClick} />
-          </Skeleton>
-        );
+        return <File file={file} onClick={onClick} key={i} />;
       })}
+      {loading &&
+        Array(files.length === 0 ? 5 : 20).map((_, j) => (
+          <Skeleton key={j}>
+            <Box h={60} w={60} />
+          </Skeleton>
+        ))}
       {queue.length > 0 && (
         <Flex
           flexDirection="column"

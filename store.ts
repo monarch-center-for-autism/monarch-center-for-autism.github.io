@@ -89,7 +89,7 @@ const fetchCategory = createAsyncThunk<FCResult, FCParam, { state: State }>(
       existingFiles = c.files;
     }
 
-    const fetchLimit = existingFiles.length === 0 ? 5 : 10;
+    const fetchLimit = existingFiles.length === 0 ? 5 : 20;
     let unqueuedFolderCount = 0;
     const newQueue: QueueFolder[] = [];
     const files: File[] = [];
@@ -105,6 +105,13 @@ const fetchCategory = createAsyncThunk<FCResult, FCParam, { state: State }>(
       const [contents, folders] = await google.getFiles(folder, fetchLimit);
 
       files.push(...contents.files);
+
+      if (contents.nextPageToken) {
+        newQueue.splice(0, 0, {
+          id: folder.id,
+          nextPageToken: contents.nextPageToken,
+        });
+      }
 
       if (searchSubfolders) {
         newQueue.splice(0, 0, ...folders);

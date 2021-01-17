@@ -13,11 +13,8 @@ export default function File({ file, onClick, key }: Props) {
   const { name, iconLink, thumbnailLink = "", description } = file ?? {};
 
   const [width, height, ref] = useRealSize();
-  const sizedLink = thumbnailLink + `?sz=w${width}h${height}`;
+  const sizedLink = thumbnailLink + `?sz=w${width}-h${height}`;
   const [thumbnailSource, onError] = useExponentialBackoff(sizedLink);
-
-  if (!file) return <div key={key} />;
-  if (file.id === "placeholder") return <Box h={60} w={60} key={key} />;
 
   return (
     <Box

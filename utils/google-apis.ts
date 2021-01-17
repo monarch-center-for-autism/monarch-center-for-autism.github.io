@@ -112,7 +112,6 @@ export async function getFiles(
   });
 
   const folders = await gapi.client.drive.files.list({
-    pageToken: folder.nextPageToken,
     pageSize: 1000,
     q: [isFolder(true), `'${getId(folder)}' in parents`].join(" and "),
     spaces: "drive",
