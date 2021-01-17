@@ -45,11 +45,13 @@ export default function FileGrid({
         return <File file={file} onClick={onClick} key={i} />;
       })}
       {loading &&
-        Array(files.length === 0 ? 5 : 20).map((_, i) => (
-          <Skeleton key={i}>
-            <Box h={60} w={60} />
-          </Skeleton>
-        ))}
+        Array(files.length === 0 ? 5 : 20)
+          .fill({})
+          .map((_, i) => (
+            <Skeleton key={i}>
+              <Box h={60} w={60} />
+            </Skeleton>
+          ))}
       {queue.length > 0 && (
         <Flex
           flexDirection="column"
