@@ -62,7 +62,9 @@ export function getUser() {
 }
 
 export async function signIn() {
-  await window.gapi.auth2.getAuthInstance().signIn();
+  await window.gapi.auth2
+    .getAuthInstance()
+    .signIn({ prompt: "select_account", ux_mode: "redirect" });
 }
 
 export function setOnAuthStatusChange(handler) {
