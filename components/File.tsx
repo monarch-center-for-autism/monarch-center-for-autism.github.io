@@ -1,6 +1,7 @@
 import { Box, Image, Text } from "@chakra-ui/react";
 import React from "react";
 import { File } from "../types/types";
+import { getAccessToken } from "../utils/google-apis";
 import useExponentialBackoff from "../utils/useExponentialBackoff";
 import useRealSize from "../utils/useRealSize";
 
@@ -9,11 +10,14 @@ type Props = {
   key?: any;
   onClick: () => any;
 };
-export default function File({ file, onClick, key }: Props) {
+export default function File({ file, onClick }: Props) {
   const { name, iconLink, thumbnailLink = "", description } = file ?? {};
 
   const [width, height, ref] = useRealSize();
-  const sizedLink = thumbnailLink + `?sz=w${width}-h${height}`;
+  const sizedLink =
+    thumbnailLink +
+    (thumbnailLink.includes("?") ? "&" : "?") +
+    `access_token=${getAccessToken()}`; // `?sz=w${width}-h${height}`;
   const [thumbnailSource, onError] = useExponentialBackoff(sizedLink);
 
   return (
@@ -30,7 +34,6 @@ export default function File({ file, onClick, key }: Props) {
       h={60}
       position="relative"
       overflow="hidden"
-      key={key}
     >
       <Image
         src={thumbnailSource}

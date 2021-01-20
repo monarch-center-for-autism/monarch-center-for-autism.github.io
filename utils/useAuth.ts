@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { fetchStructure, actions } from "../store";
+import { getUser, setGtmVariable } from "./google-apis";
 import * as google from "./google-apis";
 
 export default function useAuth() {
@@ -10,6 +11,7 @@ export default function useAuth() {
     if (val) {
       dispatch(fetchStructure());
       dispatch(actions.setUser(google.getUser()));
+      setGtmVariable("user_id", getUser().email);
     } else {
       dispatch(actions.setUser(null));
     }

@@ -10,6 +10,7 @@ import {
 import React from "react";
 import { useParams, Link, Redirect } from "react-router-dom";
 import CategoryBrowser from "../components/CategoryBrowser";
+import { fireGtmEvent } from "../utils/google-apis";
 import PageNotFound from "./PageNotFound";
 import { useSelector } from "../store";
 import { Category, Folder } from "../types/types";
@@ -21,7 +22,8 @@ function matches({ id, name }: Folder, q: string): boolean {
 export default function PageBrowser() {
   const { page, category } = useParams();
   const pages: Folder[] = useSelector((state) => state.pages);
-  const { id: pageId } = pages.find((p) => matches(p, page)) ?? {};
+  const { name: pageName, id: pageId } =
+    pages.find((p) => matches(p, page)) ?? {};
 
   const categories: Category[] = useSelector(
     (state) => state.categories
@@ -50,11 +52,22 @@ export default function PageBrowser() {
         index={selectedCategory}
       >
         <TabList flexWrap="wrap">
-          {categories.map((c) => (
-            <Tab key={c.id} as={Link} to={`/${page}/${c.id}`}>
-              {c.name}
-            </Tab>
-          ))}
+          {categories.map((c) => {
+            function handleViewCategory() {
+              fireGtmEvent("View Category", { value: c.name, page: pageName });
+            }
+
+            return (
+              <Tab
+                key={c.id}
+                as={Link}
+                to={`/${page}/${c.id}`}
+                onClick={handleViewCategory}
+              >
+                {c.name}
+              </Tab>
+            );
+          })}
         </TabList>
         <TabPanels>
           {categories.map((c) => (

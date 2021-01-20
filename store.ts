@@ -15,6 +15,7 @@ import {
   Subcategory,
 } from "./types/types";
 import { aFlatMap, aMap } from "./utils/aMap";
+import { fireGtmEvent } from "./utils/google-apis";
 import * as google from "./utils/google-apis";
 
 type State = {
@@ -149,6 +150,13 @@ const { actions, reducer } = createSlice({
       state.user = payload;
     },
     setActiveFile: (state, { payload }) => {
+      if (payload) {
+        fireGtmEvent("Preview File", {
+          file_id: payload.id,
+          file_name: payload.name,
+        });
+      }
+
       state.activeFile = payload;
     },
   },

@@ -4,6 +4,8 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import File from "../components/File";
 import { actions, fetchCategory, useSelector } from "../store";
+import { debounce } from "lodash";
+import { fireGtmEvent } from "../utils/google-apis";
 
 const fuse = new Fuse([], { keys: ["name"] });
 
@@ -13,9 +15,14 @@ export default function Search() {
   const data = categories.flatMap((category) => category.files);
   const dispatch = useDispatch();
 
-  const results = useMemo(() => {
-    return fuse.search(query).map((x) => x.item);
-  }, [data, query]);
+  const results = useMemo(
+    debounce(() => fuse.search(query).map((x) => x.item)),
+    [data, query]
+  );
+
+  useEffect(() => {
+    fireGtmEvent("Search", { query, result_count: results.length });
+  }, [results]);
 
   // TODO: This must change!!!
   // In the future, search what's already downloaded at a higher weight,

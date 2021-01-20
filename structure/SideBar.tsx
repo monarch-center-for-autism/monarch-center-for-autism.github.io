@@ -8,16 +8,23 @@ import {
   Skeleton,
   SkeletonCircle,
   SkeletonText,
+  theme,
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import React from "react";
 import { useSelector } from "../store";
 import { NavLink } from "react-router-dom";
+import { fireGtmEvent } from "../utils/google-apis";
 
 const StyledNavLink = styled(NavLink)`
   &.active {
     cursor: default;
     font-weight: bold;
+    color: ${theme.colors.purple["800"]};
+    background-color: ${theme.colors.purple["100"]};
+    border-radius: 20px;
+    padding-left: 0.5rem;
+    margin-left: -0.5rem;
 
     &:hover {
       text-decoration: none;
@@ -58,17 +65,24 @@ export default function Sidebar() {
         Pages
       </Text>
       <SkeletonText noOfLines={10} spacing={4} isLoaded={pages.length > 0}>
-        {pages.map(({ name, id }) => (
-          <Link
-            as={StyledNavLink}
-            to={`/${id}`}
-            display="block"
-            mb={2}
-            key={id}
-          >
-            {name}
-          </Link>
-        ))}
+        {pages.map(({ name, id }) => {
+          function handleViewPage() {
+            fireGtmEvent("View Page", { value: name });
+          }
+
+          return (
+            <Link
+              as={StyledNavLink}
+              to={`/${id}`}
+              display="block"
+              mb={2}
+              onClick={handleViewPage}
+              key={id}
+            >
+              {name}
+            </Link>
+          );
+        })}
       </SkeletonText>
     </Box>
   );

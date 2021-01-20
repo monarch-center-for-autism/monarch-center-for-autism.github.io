@@ -36,6 +36,14 @@ const FileProps = [
 
 const FolderProps = ["id", "name", "shortcutDetails"].join(", ");
 
+export function setGtmVariable(name: string, value: string) {
+  window.dataLayer.push({ [name]: value });
+}
+
+export function fireGtmEvent(name: string, extras: object) {
+  window.dataLayer.push({ event: name, ...extras });
+}
+
 export async function initGoogleClient() {
   await new Promise((resolve) => window.gapi.load("client:auth2", resolve));
   await window.gapi.client.init({
@@ -57,8 +65,14 @@ export function getUser() {
     .getBasicProfile();
   return {
     name: gUser.getName(),
+    email: gUser.getEmail(),
     imageUrl: gUser.getImageUrl(),
   };
+}
+
+export function getAccessToken() {
+  return window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse()
+    .id_token;
 }
 
 export async function signIn() {
