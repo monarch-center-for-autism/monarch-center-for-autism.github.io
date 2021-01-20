@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "dev": "parcel 404.html",
-    "build": "parcel build 404.html"
+    "dev": "parcel index.html",
+    "build": "parcel build index.html 404.html"
   },
   "browserslist": [
     "since 2017-06"
