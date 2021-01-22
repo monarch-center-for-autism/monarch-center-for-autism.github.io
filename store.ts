@@ -99,7 +99,7 @@ const fetchCategory = createAsyncThunk<FCResult, FCParam, { state: State }>(
     if (previousQueue.length > unqueuedFolderCount) {
       folder = previousQueue[unqueuedFolderCount++];
     } else {
-      folder = newQueue.splice(0, 1)[0];
+      folder = newQueue.shift();
     }
 
     while (folder != null && files.length < fetchLimit) {
@@ -108,27 +108,30 @@ const fetchCategory = createAsyncThunk<FCResult, FCParam, { state: State }>(
       files.push(...contents.files);
 
       if (contents.nextPageToken) {
-        newQueue.splice(0, 0, {
+        newQueue.unshift({
           id: folder.id,
           nextPageToken: contents.nextPageToken,
         });
       }
 
       if (searchSubfolders) {
-        newQueue.splice(0, 0, ...folders);
+        newQueue.unshift(...folders);
       }
 
       if (contents.nextPageToken) {
-        newQueue.splice(0, 0, {
+        newQueue.unshift({
           ...folder,
           nextPageToken: contents.nextPageToken,
         });
       }
 
-      if (previousQueue.length > unqueuedFolderCount) {
+      if (
+        previousQueue.length > unqueuedFolderCount &&
+        files.length < fetchLimit
+      ) {
         folder = previousQueue[unqueuedFolderCount++];
-      } else {
-        folder = newQueue.splice(0, 1)[0];
+      } else if (files.length < fetchLimit) {
+        folder = newQueue.shift();
       }
     }
 
