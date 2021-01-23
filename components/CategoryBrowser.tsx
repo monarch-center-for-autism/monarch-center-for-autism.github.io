@@ -24,7 +24,9 @@ export default function CategoryBrowser({ category }: Props) {
       </Box>
       {subcategories.map((s, i) => (
         <Box mb={8} key={i}>
-          <Heading mb={4}>{s.name}</Heading>
+          <Heading mb={4} id={s.id}>
+            {s.name}
+          </Heading>
           <FileGrid
             folderId={s.id}
             queue={s.queue}

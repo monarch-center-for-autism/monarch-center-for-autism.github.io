@@ -36,7 +36,7 @@ export default function FileGrid({
   }, [files.length]);
 
   return (
-    <SimpleGrid spacing={10} minChildWidth="250px">
+    <SimpleGrid spacing={10} minChildWidth="250px" w="full">
       {files.map((file, i) => {
         function onClick() {
           dispatch(actions.setActiveFile(file));

@@ -13,12 +13,12 @@ type Props = {
 export default function File({ file, onClick }: Props) {
   const { name, iconLink, thumbnailLink = "", description } = file ?? {};
 
-  const [width, height, ref] = useRealSize();
-  const sizedLink =
-    thumbnailLink +
-    (thumbnailLink.includes("?") ? "&" : "?") +
-    `access_token=${getAccessToken()}`; // `?sz=w${width}-h${height}`;
-  const [thumbnailSource, onError] = useExponentialBackoff(sizedLink);
+  // const [width, height, ref] = useRealSize();
+  // const sizedLink =
+  //   thumbnailLink +
+  //   (thumbnailLink.includes("?") ? "&" : "?") +
+  //   `access_token=${getAccessToken()}`; // `?sz=w${width}-h${height}`;
+  const [thumbnailSource, onError] = useExponentialBackoff(thumbnailLink);
 
   return (
     <Box
@@ -42,7 +42,7 @@ export default function File({ file, onClick }: Props) {
         position="absolute"
         w="full"
         h="auto"
-        ref={ref}
+        // ref={ref}
       />
 
       <Box
