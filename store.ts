@@ -23,7 +23,11 @@ type State = {
   pages: Folder[];
   categories: Category[];
   subcategories: Subcategory[];
-  activeFile?: File;
+  modals: {
+    activeFile?: File;
+    downloadAllFilesModalVisible: boolean;
+    clearCacheModalVisible: boolean;
+  };
 };
 
 type FetchStructure = {
@@ -143,11 +147,15 @@ const { actions, reducer } = createSlice({
   name: "data",
   initialState: {
     user: null,
-    pages: <Folder[]>[],
-    categories: <Category[]>[],
-    subcategories: <Subcategory[]>[],
-    activeFile: null,
-  },
+    pages: [],
+    categories: [],
+    subcategories: [],
+    modals: {
+      activeFile: null,
+      clearCacheModalVisible: false,
+      downloadAllFilesModalVisible: false,
+    },
+  } as State,
   reducers: {
     setUser: (state, { payload }) => {
       state.user = payload;
@@ -160,7 +168,19 @@ const { actions, reducer } = createSlice({
         });
       }
 
-      state.activeFile = payload;
+      state.modals.activeFile = payload;
+    },
+    showClearCacheModal: (state) => {
+      state.modals.clearCacheModalVisible = true;
+    },
+    hideClearCacheModal: (state) => {
+      state.modals.clearCacheModalVisible = false;
+    },
+    showDownloadAllFilesModal: (state) => {
+      state.modals.downloadAllFilesModalVisible = true;
+    },
+    hideDownloadAllFilesModal: (state) => {
+      state.modals.downloadAllFilesModalVisible = false;
     },
   },
   extraReducers: (builder) => {

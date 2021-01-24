@@ -12,9 +12,10 @@ import {
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import React from "react";
-import { useSelector } from "../store";
+import { actions, useSelector } from "../store";
 import { NavLink } from "react-router-dom";
 import { fireGtmEvent } from "../utils/google-apis";
+import { useDispatch } from "react-redux";
 
 const StyledNavLink = styled(NavLink)`
   &.active {
@@ -40,6 +41,11 @@ const StyledNavLink = styled(NavLink)`
 export default function Sidebar() {
   const user = useSelector((state) => state.user);
   const pages = useSelector((state) => state.pages);
+  const dispatch = useDispatch();
+
+  function handleRefreshData() {
+    dispatch(actions.showClearCacheModal());
+  }
 
   return (
     <Box p={4} bg="gray.200" w={60} flexShrink={0}>
@@ -59,6 +65,9 @@ export default function Sidebar() {
       </Text>
       <Link as={StyledNavLink} to="/search" display="block" mb={2}>
         Search
+      </Link>
+      <Link display="block" mb={2} onClick={handleRefreshData}>
+        Refresh Data
       </Link>
       <Divider borderColor="gray.400" my={4} />
       <Text color="gray.500" mb={2} textTransform="uppercase" fontSize="sm">

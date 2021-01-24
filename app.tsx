@@ -1,5 +1,7 @@
 import React from "react";
 import { Flex } from "@chakra-ui/react";
+import ClearCacheModal from "./components/ClearCacheModal";
+import DownloadAllFilesModal from "./components/DownloadAllFilesModal";
 import FileModal from "./components/FileModal";
 import Router from "./router";
 import Header from "./structure/Header";
@@ -17,6 +19,8 @@ export default function App() {
       </Flex>
 
       <FileModal />
+      <ClearCacheModal />
+      <DownloadAllFilesModal />
     </>
   );
 }
