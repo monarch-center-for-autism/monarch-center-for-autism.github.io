@@ -2,7 +2,7 @@ import { Button, ButtonGroup, Flex, Link, Text } from "@chakra-ui/react";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { fireGtmEvent } from "../utils/google-apis";
+import { fireGtmEvent } from "../data/google-apis";
 import mimeTypes from "../utils/mime-types";
 
 export default function FileSpotlight({ file }) {

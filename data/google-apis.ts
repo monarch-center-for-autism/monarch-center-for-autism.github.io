@@ -1,4 +1,6 @@
-import { Folder, FileList, QueueFolder } from "../types/types";
+import { Folder, FileList, QueueFolder, File } from "../types/types";
+import throttle from "../utils/throttle";
+import db from "./db";
 
 const DISCOVERY_DOCS = [
   "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
@@ -24,14 +26,11 @@ const FileProps = [
   "description",
   "iconLink",
   "thumbnailLink",
-  "contentHints",
   "webViewLink",
   "exportLinks",
   "webContentLink",
   "fullFileExtension",
   "parents",
-  "properties",
-  "mimeType",
 ].join(", ");
 
 const FolderProps = ["id", "name", "shortcutDetails"].join(", ");
@@ -70,11 +69,6 @@ export function getUser() {
   };
 }
 
-export function getAccessToken() {
-  return window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse()
-    .id_token;
-}
-
 export async function signIn() {
   await window.gapi.auth2
     .getAuthInstance()
@@ -90,27 +84,33 @@ function getId(file) {
 }
 
 export async function getRootFolders(): Promise<Folder[]> {
-  const pagesResponse = await window.gapi.client.drive.files.list({
-    pageSize: 1000,
-    q: [isFolder(true), `'${process.env.FOLDER_ID}' in parents`].join(" and "),
-    fields: `files(${FolderProps})`,
-    spaces: "drive",
-    orderBy: "name",
-  });
+  return await throttle(async () => {
+    const pagesResponse = await window.gapi.client.drive.files.list({
+      pageSize: 1000,
+      q: [isFolder(true), `'${process.env.FOLDER_ID}' in parents`].join(
+        " and "
+      ),
+      fields: `files(${FolderProps})`,
+      spaces: "drive",
+      orderBy: "name",
+    });
 
-  return pagesResponse.result.files;
+    return pagesResponse.result.files;
+  });
 }
 
 export async function getFolders(page: Folder): Promise<Folder[]> {
-  const response = await window.gapi.client.drive.files.list({
-    pageSize: 1000,
-    q: [isFolder(true), `'${getId(page)}' in parents`].join(" and "),
-    fields: `files(${FolderProps})`,
-    spaces: "drive",
-    orderBy: "name",
-  });
+  return await throttle(async () => {
+    const response = await window.gapi.client.drive.files.list({
+      pageSize: 1000,
+      q: [isFolder(true), `'${getId(page)}' in parents`].join(" and "),
+      fields: `files(${FolderProps})`,
+      spaces: "drive",
+      orderBy: "name",
+    });
 
-  return response.result.files;
+    return response.result.files;
+  });
 }
 
 export async function getFiles(
@@ -118,22 +118,39 @@ export async function getFiles(
   limit: number
 ): Promise<[FileList, Folder[]]> {
   const inFolder = `'${getId(folder)}' in parents`;
-  const files = await gapi.client.drive.files.list({
-    pageToken: folder.nextPageToken,
-    pageSize: limit,
-    q: [isFolder(false), inFolder, "trashed = false"].join(" and "),
-    spaces: "drive",
-    fields: `nextPageToken, files(${FileProps})`,
-    orderBy: "name",
-  });
+  const files = await throttle(async () =>
+    gapi.client.drive.files.list({
+      pageToken: folder.nextPageToken,
+      pageSize: limit,
+      q: [isFolder(false), inFolder, "trashed = false"].join(" and "),
+      spaces: "drive",
+      fields: `nextPageToken, files(${FileProps})`,
+      orderBy: "name",
+    })
+  );
 
-  const folders = await gapi.client.drive.files.list({
-    pageSize: 1000,
-    q: [isFolder(true), `'${getId(folder)}' in parents`].join(" and "),
-    spaces: "drive",
-    fields: `files(${FolderProps})`,
-    orderBy: "name",
-  });
+  const folders = await throttle(async () =>
+    gapi.client.drive.files.list({
+      pageSize: 1000,
+      q: [isFolder(true), `'${getId(folder)}' in parents`].join(" and "),
+      spaces: "drive",
+      fields: `files(${FolderProps})`,
+      orderBy: "name",
+    })
+  );
 
   return [files.result, folders.result.files];
+}
+
+export async function getThumbnail(file: File): Promise<string> {
+  const match = db.getImage(file.id);
+  if (match) {
+    return URL.createObjectURL(match);
+  }
+
+  const response = await throttle(async () => fetch(file.thumbnailLink));
+  const blob = await response.blob();
+
+  await db.setImage(file.id, blob);
+  return URL.createObjectURL(blob);
 }

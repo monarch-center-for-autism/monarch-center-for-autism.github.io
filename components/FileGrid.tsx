@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDispatch } from "react-redux";
 import React, { useEffect } from "react";
 import File from "./File";
-import { actions, fetchCategory } from "../store";
+import { actions, fetchCategory } from "../data/store";
 import { File as FileType, QueueFolder } from "../types/types";
 
 type Props = {
@@ -36,7 +36,7 @@ export default function FileGrid({
   }, [files.length]);
 
   return (
-    <SimpleGrid spacing={10} minChildWidth="250px" w="full">
+    <SimpleGrid spacing={10} minChildWidth="200px" w="full">
       {files.map((file, i) => {
         function onClick() {
           dispatch(actions.setActiveFile(file));
@@ -49,7 +49,7 @@ export default function FileGrid({
           .fill({})
           .map((_, i) => (
             <Skeleton key={i}>
-              <Box h={60} w={60} />
+              <Box h={48} w={48} />
             </Skeleton>
           ))}
       {queue.length > 0 && (
@@ -67,7 +67,7 @@ export default function FileGrid({
           cursor="pointer"
           borderWidth="1px"
           onClick={loadMoreFiles}
-          h={60}
+          h={48}
         >
           <FontAwesomeIcon
             icon={faChevronCircleRight}

@@ -12,9 +12,9 @@ import {
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import React from "react";
-import { actions, useSelector } from "../store";
+import { actions, useSelector } from "../data/store";
 import { NavLink } from "react-router-dom";
-import { fireGtmEvent } from "../utils/google-apis";
+import { fireGtmEvent } from "../data/google-apis";
 import { useDispatch } from "react-redux";
 
 const StyledNavLink = styled(NavLink)`

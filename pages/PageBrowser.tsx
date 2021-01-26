@@ -10,9 +10,9 @@ import {
 import React from "react";
 import { useParams, Link, Redirect } from "react-router-dom";
 import CategoryBrowser from "../components/CategoryBrowser";
-import { fireGtmEvent } from "../utils/google-apis";
+import { fireGtmEvent } from "../data/google-apis";
 import PageNotFound from "./PageNotFound";
-import { useSelector } from "../store";
+import { useSelector } from "../data/store";
 import { Category, Folder } from "../types/types";
 
 function matches({ id, name }: Folder, q: string): boolean {

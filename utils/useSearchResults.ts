@@ -1,9 +1,9 @@
 import Fuse from "fuse.js";
 import { groupBy, maxBy, orderBy, sumBy } from "lodash";
 import { useEffect, useState } from "react";
-import { useSelector } from "../store";
+import { useSelector } from "../data/store";
 import { File } from "../types/types";
-import { fireGtmEvent } from "./google-apis";
+import { fireGtmEvent } from "../data/google-apis";
 
 const fuse = new Fuse([], {
   keys: ["name", "description"],

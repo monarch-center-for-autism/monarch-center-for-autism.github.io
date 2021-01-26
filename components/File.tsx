@@ -1,9 +1,7 @@
 import { Box, Image, Text } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getThumbnail } from "../data/google-apis";
 import { File } from "../types/types";
-import { getAccessToken } from "../utils/google-apis";
-import useExponentialBackoff from "../utils/useExponentialBackoff";
-import useRealSize from "../utils/useRealSize";
 
 type Props = {
   file: File;
@@ -11,14 +9,12 @@ type Props = {
   onClick: () => any;
 };
 export default function File({ file, onClick }: Props) {
-  const { name, iconLink, thumbnailLink = "", description } = file ?? {};
+  const { name, iconLink, description } = file ?? {};
+  const [thumbnailLink, setThumbnailLink] = useState("");
 
-  // const [width, height, ref] = useRealSize();
-  // const sizedLink =
-  //   thumbnailLink +
-  //   (thumbnailLink.includes("?") ? "&" : "?") +
-  //   `access_token=${getAccessToken()}`; // `?sz=w${width}-h${height}`;
-  const [thumbnailSource, onError] = useExponentialBackoff(thumbnailLink);
+  useEffect(() => {
+    getThumbnail(file).then(setThumbnailLink);
+  });
 
   return (
     <Box
@@ -31,19 +27,11 @@ export default function File({ file, onClick }: Props) {
       borderWidth="1px"
       borderRadius="lg"
       onClick={onClick}
-      h={60}
+      h={48}
       position="relative"
       overflow="hidden"
     >
-      <Image
-        src={thumbnailSource}
-        onError={onError}
-        alt=""
-        position="absolute"
-        w="full"
-        h="auto"
-        // ref={ref}
-      />
+      <Image src={thumbnailLink} alt="" position="absolute" w="full" h="auto" />
 
       <Box
         p={4}

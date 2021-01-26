@@ -1,9 +1,9 @@
-import PageBrowser from "./pages/PageBrowser";
+import PageBrowser from "./PageBrowser";
 import React from "react";
 import { Route, Switch } from "react-router-dom";
-import Home from "./pages/Home";
-import Search from "./pages/Search";
-import useAuth from "./utils/useAuth";
+import Home from "./Home";
+import Search from "./Search";
+import useAuth from "../utils/useAuth";
 
 export default function Router() {
   useAuth();

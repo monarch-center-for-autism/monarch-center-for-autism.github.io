@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 import { useDispatch } from "react-redux";
-import { actions, useSelector } from "../store";
+import { actions, useSelector } from "../data/store";
 
 export default function ClearCacheModal() {
   const isOpen = useSelector((state) => state.modals.clearCacheModalVisible);

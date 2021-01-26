@@ -1,6 +1,6 @@
 import React from "react";
 import { Heading, Box } from "@chakra-ui/react";
-import { useSelector } from "../store";
+import { useSelector } from "../data/store";
 import { Category } from "../types/types";
 import FileGrid from "./FileGrid";
 

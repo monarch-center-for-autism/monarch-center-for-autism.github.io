@@ -20,16 +20,21 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
+  InputGroup,
+  InputRightElement,
+  Button,
 } from "@chakra-ui/react";
 import { ChevronRightIcon } from "@chakra-ui/icons";
 import React, { useState } from "react";
 import FileGrid from "../components/FileGrid";
-import { useSelector } from "../store";
+import { useSelector, actions } from "../data/store";
 import { sumBy } from "lodash";
 import { NavLink } from "react-router-dom";
 import useSearchResults from "../utils/useSearchResults";
+import { useDispatch } from "react-redux";
 
 export default function Search() {
+  const dispatch = useDispatch();
   const categories = useSelector((state) => state.categories);
   const subcategories = useSelector((state) => state.subcategories);
 
@@ -46,14 +51,25 @@ export default function Search() {
     setQuery(e.target.value);
   }
 
+  function handleSearchAllResources() {
+    dispatch(actions.showDownloadAllFilesModal());
+  }
+
   return (
     <Flex flex={1} direction="column" alignItems="center" p={8}>
-      <Input
-        size="lg"
-        placeholder="Type to search"
-        value={query}
-        onChange={handleQueryChange}
-      />
+      <InputGroup>
+        <Input
+          size="lg"
+          placeholder="Type to search"
+          value={query}
+          onChange={handleQueryChange}
+        />
+        <InputRightElement w="12rem" h="full">
+          <Button size="sm" onClick={handleSearchAllResources}>
+            Search All Resources
+          </Button>
+        </InputRightElement>
+      </InputGroup>
       <Accordion w="full" mt={4} mb={16} allowToggle>
         <AccordionItem>
           <AccordionButton>

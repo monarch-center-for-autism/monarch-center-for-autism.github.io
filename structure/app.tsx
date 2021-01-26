@@ -1,11 +1,11 @@
 import React from "react";
 import { Flex } from "@chakra-ui/react";
-import ClearCacheModal from "./components/ClearCacheModal";
-import DownloadAllFilesModal from "./components/DownloadAllFilesModal";
-import FileModal from "./components/FileModal";
-import Router from "./router";
-import Header from "./structure/Header";
-import Sidebar from "./structure/SideBar";
+import ClearCacheModal from "../components/ClearCacheModal";
+import DownloadAllFilesModal from "../components/DownloadAllFilesModal";
+import FileModal from "../components/FileModal";
+import Router from "../pages/router";
+import Header from "./Header";
+import Sidebar from "./SideBar";
 
 export default function App() {
   return (

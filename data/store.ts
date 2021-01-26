@@ -13,10 +13,10 @@ import {
   Folder,
   QueueFolder,
   Subcategory,
-} from "./types/types";
-import { aFlatMap, aMap } from "./utils/aMap";
-import { fireGtmEvent } from "./utils/google-apis";
-import * as google from "./utils/google-apis";
+} from "../types/types";
+import { aFlatMap, aMap } from "../utils/aMap";
+import { fireGtmEvent } from "./google-apis";
+import * as google from "./google-apis";
 
 type State = {
   user?: gapi.auth2.GoogleUser;
@@ -36,7 +36,7 @@ type FetchStructure = {
   subcategories: Subcategory[];
 };
 const fetchStructure = createAsyncThunk<FetchStructure, void, {}>(
-  "fetchData",
+  "fetchStructure",
   async () => {
     const pages = await google.getRootFolders();
     const categories: Category[] = await aFlatMap(
@@ -78,7 +78,7 @@ type FCResult = {
   unqueuedFolderCount: number;
 };
 const fetchCategory = createAsyncThunk<FCResult, FCParam, { state: State }>(
-  "refreshData",
+  "fetchCategory",
   async ({ category, searchSubfolders }, thunkApi) => {
     // As a hack, we always search subfolders in subcategories, and never
     // in categories
@@ -94,7 +94,7 @@ const fetchCategory = createAsyncThunk<FCResult, FCParam, { state: State }>(
       existingFiles = c.files;
     }
 
-    const fetchLimit = existingFiles.length === 0 ? 5 : 20;
+    const fetchLimit = existingFiles.length === 0 ? 10 : 40;
     let unqueuedFolderCount = 0;
     const newQueue: QueueFolder[] = [];
     const files: File[] = [];
@@ -182,6 +182,14 @@ const { actions, reducer } = createSlice({
     hideDownloadAllFilesModal: (state) => {
       state.modals.downloadAllFilesModalVisible = false;
     },
+    addCategoryFiles: (state, { payload: { id, files } }) => {
+      const i = state.categories.findIndex((c) => c.id === id);
+      state.categories[i].files.concat(files);
+    },
+    addSubcategoryFiles: (state, { payload: { id, files } }) => {
+      const i = state.subcategories.findIndex((c) => c.id === id);
+      state.subcategories[i].files.concat(files);
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchStructure.fulfilled, (state, { payload }) => {
@@ -241,7 +249,24 @@ const { actions, reducer } = createSlice({
   },
 });
 
-const store = configureStore({ reducer });
+const cacheMiddleware = (storeApi) => (next) => (action) => {
+  const result = next(action);
+
+  if (/fulfilled$/.test(action.type)) {
+    const { pages, categories, subcategories } = storeApi.getState();
+    localStorage.setItem("pages", JSON.stringify(pages));
+    localStorage.setItem("categories", JSON.stringify(categories));
+    localStorage.setItem("subcategories", JSON.stringify(subcategories));
+  }
+
+  return result;
+};
+
+const store = configureStore({
+  reducer,
+  // middleware: (getDefaultMiddleware) =>
+  //   getDefaultMiddleware().concat(cacheMiddleware),
+});
 
 const useSelector: TypedUseSelectorHook<State> = useUntypedSelector;
 

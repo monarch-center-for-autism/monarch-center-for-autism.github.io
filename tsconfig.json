@@ -6,6 +6,8 @@
             "dom"
         ],
         "jsx": "react",
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "moduleResolution": "Node"
     }
 }

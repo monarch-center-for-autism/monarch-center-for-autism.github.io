@@ -8,7 +8,7 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 import { useDispatch } from "react-redux";
-import { actions, useSelector } from "../store";
+import { actions, useSelector } from "../data/store";
 import FileSpotlight from "./FileSpotlight";
 
 export default function FileModal() {
