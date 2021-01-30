@@ -21,7 +21,8 @@ export default function ClearCacheModal() {
   }
 
   function handleClearCache() {
-    localStorage.clear();
+    localStorage.setItem("structureInvalidationTime", Date.now().toString());
+    localStorage.setItem("fileInvalidationTime", Date.now().toString());
     window.location.reload();
   }
 
@@ -33,12 +34,10 @@ export default function ClearCacheModal() {
         <ModalCloseButton />
         <ModalBody fontWeight={300}>
           To save on loading time, the site remembers all of the pages and files
-          after you see them for the first time. However, if new content gets
-          added, it won't show up until you tell the site to look for it.
-          <br />
-          <br />
-          After refreshing data, you will have to download information again to
-          search.
+          after you see them for the first time. It checks for new files
+          approximately every week and new files every day. However, if new
+          content was added, and you want to see it now, you'll have to tell the
+          site to look for it.
         </ModalBody>
 
         <ModalFooter>

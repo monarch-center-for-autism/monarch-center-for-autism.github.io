@@ -71,7 +71,7 @@ export default function PageBrowser() {
         </TabList>
         <TabPanels>
           {categories.map((c) => (
-            <TabPanel key={c.id}>
+            <TabPanel key={c.id} style={{ outline: 0 }}>
               <CategoryBrowser category={c} />
             </TabPanel>
           ))}

@@ -12,7 +12,7 @@ import { actions, useSelector } from "../data/store";
 import FileSpotlight from "./FileSpotlight";
 
 export default function FileModal() {
-  const activeFile = useSelector((state) => state.activeFile);
+  const activeFile = useSelector((state) => state.modals.activeFile);
   const dispatch = useDispatch();
 
   function handleOnClose() {
@@ -20,7 +20,7 @@ export default function FileModal() {
   }
 
   return (
-    <Modal isOpen={activeFile} onClose={handleOnClose} size="full">
+    <Modal isOpen={!!activeFile} onClose={handleOnClose} size="full">
       <ModalOverlay />
       <ModalContent w="80%" h="80%">
         <ModalHeader>{activeFile?.name}</ModalHeader>

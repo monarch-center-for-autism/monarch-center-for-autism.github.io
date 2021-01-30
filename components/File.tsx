@@ -14,7 +14,7 @@ export default function File({ file, onClick }: Props) {
 
   useEffect(() => {
     getThumbnail(file).then(setThumbnailLink);
-  });
+  }, []);
 
   return (
     <Box

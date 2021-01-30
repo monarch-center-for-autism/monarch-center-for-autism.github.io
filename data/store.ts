@@ -11,12 +11,13 @@ import {
   Category,
   File,
   Folder,
-  QueueFolder,
+  SiteStructure,
   Subcategory,
 } from "../types/types";
 import { aFlatMap, aMap } from "../utils/aMap";
 import { fireGtmEvent } from "./google-apis";
 import * as google from "./google-apis";
+import db from "./db";
 
 type State = {
   user?: gapi.auth2.GoogleUser;
@@ -30,14 +31,14 @@ type State = {
   };
 };
 
-type FetchStructure = {
-  pages: Folder[];
-  categories: Category[];
-  subcategories: Subcategory[];
-};
-const fetchStructure = createAsyncThunk<FetchStructure, void, {}>(
+const fetchStructure = createAsyncThunk<SiteStructure, void, {}>(
   "fetchStructure",
   async () => {
+    const cachedStructure = await db.getStructure();
+    if (cachedStructure) {
+      return cachedStructure;
+    }
+
     const pages = await google.getRootFolders();
     const categories: Category[] = await aFlatMap(
       pages,
@@ -45,10 +46,8 @@ const fetchStructure = createAsyncThunk<FetchStructure, void, {}>(
         await aMap(await google.getFolders(page), async (category) => ({
           ...category,
           loading: false,
-          folders: [],
           pageId: page.id,
           files: [],
-          queue: [{ id: category.id }],
         }))
     );
     const subcategories: Subcategory[] = await aFlatMap(
@@ -57,89 +56,40 @@ const fetchStructure = createAsyncThunk<FetchStructure, void, {}>(
         await aMap(await google.getFolders(category), (subcategory) => ({
           ...subcategory,
           loading: false,
-          folders: [],
           categoryId: category.id,
           files: [],
-          queue: [{ id: subcategory.id }],
         }))
     );
 
-    return { pages, categories, subcategories };
+    const structure = { pages, categories, subcategories };
+    await db.setStructure(structure);
+
+    return structure;
   }
 );
 
 type FCParam = {
-  category: string;
-  searchSubfolders: boolean;
+  category: Category | Subcategory;
+  isSubcategory: boolean;
 };
-type FCResult = {
-  files: File[];
-  queue: QueueFolder[];
-  unqueuedFolderCount: number;
-};
-const fetchCategory = createAsyncThunk<FCResult, FCParam, { state: State }>(
+const fetchCategory = createAsyncThunk<File[], FCParam>(
   "fetchCategory",
-  async ({ category, searchSubfolders }, thunkApi) => {
-    // As a hack, we always search subfolders in subcategories, and never
-    // in categories
-    const state = thunkApi.getState();
-    let previousQueue, existingFiles;
-    if (searchSubfolders) {
-      const c = state.subcategories.find((c) => c.id === category);
-      previousQueue = c.queue;
-      existingFiles = c.files;
-    } else {
-      const c = state.categories.find((c) => c.id === category);
-      previousQueue = c.queue;
-      existingFiles = c.files;
+  async ({ category }) => {
+    const cachedFiles = await db.getFiles(category.id);
+    if (cachedFiles) {
+      return cachedFiles;
     }
 
-    const fetchLimit = existingFiles.length === 0 ? 10 : 40;
-    let unqueuedFolderCount = 0;
-    const newQueue: QueueFolder[] = [];
     const files: File[] = [];
-
-    let folder: QueueFolder;
-    if (previousQueue.length > unqueuedFolderCount) {
-      folder = previousQueue[unqueuedFolderCount++];
-    } else {
-      folder = newQueue.shift();
-    }
-
-    while (folder != null && files.length < fetchLimit) {
-      const [contents, folders] = await google.getFiles(folder, fetchLimit);
-
+    let nextPageToken: string = null;
+    do {
+      const contents = await google.getFiles(category, nextPageToken);
       files.push(...contents.files);
+      nextPageToken = contents.nextPageToken;
+    } while (nextPageToken);
 
-      if (contents.nextPageToken) {
-        newQueue.unshift({
-          id: folder.id,
-          nextPageToken: contents.nextPageToken,
-        });
-      }
-
-      if (searchSubfolders) {
-        newQueue.unshift(...folders);
-      }
-
-      if (contents.nextPageToken) {
-        newQueue.unshift({
-          ...folder,
-          nextPageToken: contents.nextPageToken,
-        });
-      }
-
-      if (
-        previousQueue.length > unqueuedFolderCount &&
-        files.length < fetchLimit
-      ) {
-        folder = previousQueue[unqueuedFolderCount++];
-      } else if (files.length < fetchLimit) {
-        folder = newQueue.shift();
-      }
-    }
-
-    return { files, queue: newQueue, unqueuedFolderCount };
+    await db.addFiles(files);
+    return files;
   }
 );
 
@@ -199,74 +149,48 @@ const { actions, reducer } = createSlice({
       state.subcategories = subcategories;
     });
     builder.addCase(fetchCategory.pending, (state, { meta: { arg } }) => {
-      const { category, searchSubfolders } = arg;
+      const { category, isSubcategory } = arg;
 
-      // As a hack, we always search subfolders in subcategories, and never
-      // in categories
-      if (searchSubfolders) {
-        const i = state.subcategories.findIndex((c) => c.id === category);
+      if (isSubcategory) {
+        const i = state.subcategories.findIndex((c) => c.id === category.id);
         state.subcategories[i].loading = true;
       } else {
-        const i = state.categories.findIndex((c) => c.id === category);
+        const i = state.categories.findIndex((c) => c.id === category.id);
         state.categories[i].loading = true;
       }
     });
     builder.addCase(
       fetchCategory.fulfilled,
-      (state, { payload, meta: { arg } }) => {
-        const { category, searchSubfolders } = arg;
-        const { files, queue, unqueuedFolderCount } = payload;
+      (state, { payload: files, meta: { arg } }) => {
+        const { category, isSubcategory } = arg;
 
-        // As a hack, we always search subfolders in subcategories, and never
-        // in categories
-        if (searchSubfolders) {
-          const i = state.subcategories.findIndex((c) => c.id === category);
+        if (isSubcategory) {
+          const i = state.subcategories.findIndex((c) => c.id === category.id);
           state.subcategories[i].files.push(...files);
-          state.subcategories[i].queue.splice(0, unqueuedFolderCount, ...queue);
           state.subcategories[i].loading = false;
         } else {
-          const i = state.categories.findIndex((c) => c.id === category);
+          const i = state.categories.findIndex((c) => c.id === category.id);
           state.categories[i].files.push(...files);
-          state.categories[i].queue.splice(0, unqueuedFolderCount, ...queue);
           state.categories[i].loading = false;
         }
       }
     );
 
     builder.addCase(fetchCategory.rejected, (state, { meta: { arg } }) => {
-      const { category, searchSubfolders } = arg;
+      const { category, isSubcategory } = arg;
 
-      // As a hack, we always search subfolders in subcategories, and never
-      // in categories
-      if (searchSubfolders) {
-        const i = state.subcategories.findIndex((c) => c.id === category);
+      if (isSubcategory) {
+        const i = state.subcategories.findIndex((c) => c.id === category.id);
         state.subcategories[i].loading = false;
       } else {
-        const i = state.categories.findIndex((c) => c.id === category);
+        const i = state.categories.findIndex((c) => c.id === category.id);
         state.categories[i].loading = false;
       }
     });
   },
 });
 
-const cacheMiddleware = (storeApi) => (next) => (action) => {
-  const result = next(action);
-
-  if (/fulfilled$/.test(action.type)) {
-    const { pages, categories, subcategories } = storeApi.getState();
-    localStorage.setItem("pages", JSON.stringify(pages));
-    localStorage.setItem("categories", JSON.stringify(categories));
-    localStorage.setItem("subcategories", JSON.stringify(subcategories));
-  }
-
-  return result;
-};
-
-const store = configureStore({
-  reducer,
-  // middleware: (getDefaultMiddleware) =>
-  //   getDefaultMiddleware().concat(cacheMiddleware),
-});
+const store = configureStore({ reducer });
 
 const useSelector: TypedUseSelectorHook<State> = useUntypedSelector;
 

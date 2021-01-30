@@ -2,31 +2,18 @@ import { Box, Flex, SimpleGrid, Skeleton, Text } from "@chakra-ui/react";
 import { faChevronCircleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDispatch } from "react-redux";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import File from "./File";
-import { actions, fetchCategory } from "../data/store";
-import { File as FileType, QueueFolder } from "../types/types";
+import { actions } from "../data/store";
+import { File as FileType } from "../types/types";
 
-type Props = {
-  files: FileType[];
-  loading: boolean;
-  folderId: string;
-  queue: QueueFolder[];
-  isSubcategory?: boolean;
-};
-export default function FileGrid({
-  files,
-  loading,
-  folderId,
-  queue,
-  isSubcategory = true,
-}: Props) {
+type Props = { files: FileType[]; loading: boolean };
+export default function FileGrid({ files, loading }: Props) {
+  const [maxIndex, setMaxIndex] = useState(10);
   const dispatch = useDispatch();
 
   function loadMoreFiles() {
-    dispatch(
-      fetchCategory({ category: folderId, searchSubfolders: isSubcategory })
-    );
+    setMaxIndex(maxIndex + 10);
   }
 
   useEffect(() => {
@@ -37,7 +24,7 @@ export default function FileGrid({
 
   return (
     <SimpleGrid spacing={10} minChildWidth="200px" w="full">
-      {files.map((file, i) => {
+      {files.slice(0, maxIndex).map((file, i) => {
         function onClick() {
           dispatch(actions.setActiveFile(file));
         }
@@ -52,7 +39,7 @@ export default function FileGrid({
               <Box h={48} w={48} />
             </Skeleton>
           ))}
-      {queue.length > 0 && (
+      {maxIndex < files.length && (
         <Flex
           flexDirection="column"
           alignItems="center"

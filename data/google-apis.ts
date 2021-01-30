@@ -1,4 +1,4 @@
-import { Folder, FileList, QueueFolder, File } from "../types/types";
+import { Folder, FileList, File } from "../types/types";
 import throttle from "../utils/throttle";
 import db from "./db";
 
@@ -114,14 +114,14 @@ export async function getFolders(page: Folder): Promise<Folder[]> {
 }
 
 export async function getFiles(
-  folder: QueueFolder,
-  limit: number
-): Promise<[FileList, Folder[]]> {
+  folder: Folder,
+  pageToken: string
+): Promise<FileList> {
   const inFolder = `'${getId(folder)}' in parents`;
   const files = await throttle(async () =>
     gapi.client.drive.files.list({
-      pageToken: folder.nextPageToken,
-      pageSize: limit,
+      pageToken,
+      pageSize: 1000,
       q: [isFolder(false), inFolder, "trashed = false"].join(" and "),
       spaces: "drive",
       fields: `nextPageToken, files(${FileProps})`,
@@ -129,21 +129,11 @@ export async function getFiles(
     })
   );
 
-  const folders = await throttle(async () =>
-    gapi.client.drive.files.list({
-      pageSize: 1000,
-      q: [isFolder(true), `'${getId(folder)}' in parents`].join(" and "),
-      spaces: "drive",
-      fields: `files(${FolderProps})`,
-      orderBy: "name",
-    })
-  );
-
-  return [files.result, folders.result.files];
+  return files.result;
 }
 
 export async function getThumbnail(file: File): Promise<string> {
-  const match = db.getImage(file.id);
+  const match = await db.getImage(file.id);
   if (match) {
     return URL.createObjectURL(match);
   }
