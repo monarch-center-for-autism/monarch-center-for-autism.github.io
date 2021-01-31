@@ -3,9 +3,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
-import App from "./structure/app";
-import { store } from "./data/store";
-import Fonts from "./structure/Fonts";
+import App from "../structure/app";
+import { store } from "../data/store";
+import Fonts from "../structure/Fonts";
 
 const theme = extendTheme({
   fonts: {

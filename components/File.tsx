@@ -13,7 +13,11 @@ export default function File({ file, onClick }: Props) {
   const [thumbnailLink, setThumbnailLink] = useState("");
 
   useEffect(() => {
-    getThumbnail(file).then(setThumbnailLink);
+    getThumbnail(file)
+      .then(setThumbnailLink)
+      .catch(() => {
+        setThumbnailLink(file.thumbnailLink);
+      });
   }, []);
 
   return (

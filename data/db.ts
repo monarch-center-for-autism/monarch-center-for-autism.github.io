@@ -85,7 +85,7 @@ class Database extends Dexie {
       return null;
     }
 
-    return this.files.where("parent").equals(parentId).toArray();
+    return this.files.where("parents").equals(parentId).toArray();
   }
 
   async addFiles(files: File[]): Promise<void> {

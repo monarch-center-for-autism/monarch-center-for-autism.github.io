@@ -69,6 +69,11 @@ export function getUser() {
   };
 }
 
+export function getAccessToken(): string {
+  return window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse()
+    .access_token;
+}
+
 export async function signIn() {
   await window.gapi.auth2
     .getAuthInstance()

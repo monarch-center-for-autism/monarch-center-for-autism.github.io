@@ -14,6 +14,7 @@ import {
   SiteStructure,
   Subcategory,
 } from "../types/types";
+import CategoryState from "../types/category-states";
 import { aFlatMap, aMap } from "../utils/aMap";
 import { fireGtmEvent } from "./google-apis";
 import * as google from "./google-apis";
@@ -45,7 +46,7 @@ const fetchStructure = createAsyncThunk<SiteStructure, void, {}>(
       async (page) =>
         await aMap(await google.getFolders(page), async (category) => ({
           ...category,
-          loading: false,
+          state: CategoryState.INIT,
           pageId: page.id,
           files: [],
         }))
@@ -55,7 +56,7 @@ const fetchStructure = createAsyncThunk<SiteStructure, void, {}>(
       async (category) =>
         await aMap(await google.getFolders(category), (subcategory) => ({
           ...subcategory,
-          loading: false,
+          state: CategoryState.INIT,
           categoryId: category.id,
           files: [],
         }))
@@ -76,7 +77,7 @@ const fetchCategory = createAsyncThunk<File[], FCParam>(
   "fetchCategory",
   async ({ category }) => {
     const cachedFiles = await db.getFiles(category.id);
-    if (cachedFiles) {
+    if (cachedFiles && cachedFiles.length > 0) {
       return cachedFiles;
     }
 
@@ -132,14 +133,6 @@ const { actions, reducer } = createSlice({
     hideDownloadAllFilesModal: (state) => {
       state.modals.downloadAllFilesModalVisible = false;
     },
-    addCategoryFiles: (state, { payload: { id, files } }) => {
-      const i = state.categories.findIndex((c) => c.id === id);
-      state.categories[i].files.concat(files);
-    },
-    addSubcategoryFiles: (state, { payload: { id, files } }) => {
-      const i = state.subcategories.findIndex((c) => c.id === id);
-      state.subcategories[i].files.concat(files);
-    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchStructure.fulfilled, (state, { payload }) => {
@@ -153,10 +146,10 @@ const { actions, reducer } = createSlice({
 
       if (isSubcategory) {
         const i = state.subcategories.findIndex((c) => c.id === category.id);
-        state.subcategories[i].loading = true;
+        state.subcategories[i].state = CategoryState.LOADING;
       } else {
         const i = state.categories.findIndex((c) => c.id === category.id);
-        state.categories[i].loading = true;
+        state.categories[i].state = CategoryState.LOADING;
       }
     });
     builder.addCase(
@@ -167,11 +160,11 @@ const { actions, reducer } = createSlice({
         if (isSubcategory) {
           const i = state.subcategories.findIndex((c) => c.id === category.id);
           state.subcategories[i].files.push(...files);
-          state.subcategories[i].loading = false;
+          state.subcategories[i].state = CategoryState.FETCHED;
         } else {
           const i = state.categories.findIndex((c) => c.id === category.id);
           state.categories[i].files.push(...files);
-          state.categories[i].loading = false;
+          state.categories[i].state = CategoryState.FETCHED;
         }
       }
     );
@@ -181,10 +174,10 @@ const { actions, reducer } = createSlice({
 
       if (isSubcategory) {
         const i = state.subcategories.findIndex((c) => c.id === category.id);
-        state.subcategories[i].loading = false;
+        state.subcategories[i].state = CategoryState.INIT;
       } else {
         const i = state.categories.findIndex((c) => c.id === category.id);
-        state.categories[i].loading = false;
+        state.categories[i].state = CategoryState.INIT;
       }
     });
   },

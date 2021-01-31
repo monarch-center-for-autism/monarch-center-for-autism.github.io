@@ -12,7 +12,7 @@ import {
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { actions, useSelector, fetchCategory } from "../data/store";
-import sleep from "../utils/sleep";
+import CategoryState from "../types/category-states";
 
 export default function DownloadAllFilesModal() {
   const [isFetching, setIsFetching] = useState(false);
@@ -34,39 +34,33 @@ export default function DownloadAllFilesModal() {
   async function handleDownloadAllFiles() {
     setIsFetching(true);
 
-    const categoriesToFetch = categories.filter((c) => c.queue.length > 0);
+    const categoriesToFetch = categories.filter(
+      (c) => c.state === CategoryState.INIT
+    );
     const subcategoriesToFetch = subcategories.filter(
-      (s) => s.queue.length > 0
+      (s) => s.state === CategoryState.INIT
     );
     const total = categoriesToFetch.length + subcategoriesToFetch.length;
     let current = 0;
 
-    for (let c of categoriesToFetch) {
-      let action,
-        timesFetched = 0;
+    for (let category of categoriesToFetch) {
+      let action;
       do {
-        setCurrentCategory(
-          `[${current}/${total}] Fetching ${c.name} - ${++timesFetched} / ?`
-        );
+        setCurrentCategory(`[${current}/${total}] Fetching ${category.name}`);
         action = await dispatch(
-          fetchCategory({ category: c.id, searchSubfolders: false })
+          fetchCategory({ category, isSubcategory: false })
         );
-        await sleep(50);
       } while (action?.payload?.queue?.length > 0);
       setProgress((++current * 100) / total);
     }
 
-    for (let s of subcategoriesToFetch) {
-      let action,
-        timesFetched = 0;
+    for (let category of subcategoriesToFetch) {
+      let action;
       do {
-        setCurrentCategory(
-          `[${current}/${total}] Fetching ${s.name} - ${++timesFetched} / ?`
-        );
+        setCurrentCategory(`[${current}/${total}] Fetching ${category.name}`);
         action = await dispatch(
-          fetchCategory({ category: s.id, searchSubfolders: true })
+          fetchCategory({ category, isSubcategory: true })
         );
-        await sleep(50);
       } while (action?.payload?.queue?.length > 0);
       setProgress((++current * 100) / total);
     }
@@ -81,7 +75,7 @@ export default function DownloadAllFilesModal() {
       <ModalContent>
         <ModalHeader>Prepare to Search All Resources</ModalHeader>
         {!isFetching && <ModalCloseButton />}
-        <ModalBody fontWeight={300}>
+        <ModalBody fontWeight="300">
           To search all resources, some data has to be downloaded about the
           files you haven't seen yet.{" "}
           <strong>

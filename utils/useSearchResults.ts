@@ -60,23 +60,27 @@ export default function useSearchResults(items, query) {
   }
 
   useEffect(() => {
-    const fuseResults = fuse.search<File>(query);
-    const fixedParents = fuseResults.map((r) => ({
-      ...r,
-      item: fixParent(r.item),
-    }));
-    const groups = groupBy(fixedParents, "item.parents[0]");
-    const orderedEntries = orderBy(
-      Object.entries(groups),
-      [(g) => maxBy(g, "score")],
-      ["desc"]
-    );
-    const results = orderedEntries.map(([parent, results]) => ({
-      crumbs: getCrumbs(parent),
-      files: orderBy(results, ["score"], ["desc"]).map((r) => r.item),
-    }));
+    console.log(`searching ${query}`);
+    new Promise<void>((resolve) => {
+      const fuseResults = fuse.search<File>(query);
+      const fixedParents = fuseResults.map((r) => ({
+        ...r,
+        item: fixParent(r.item),
+      }));
+      const groups = groupBy(fixedParents, "item.parents[0]");
+      const orderedEntries = orderBy(
+        Object.entries(groups),
+        [(g) => maxBy(g, "score")],
+        ["desc"]
+      );
+      const results = orderedEntries.map(([parent, results]) => ({
+        crumbs: getCrumbs(parent),
+        files: orderBy(results, ["score"], ["desc"]).map((r) => r.item),
+      }));
 
-    setResults(results);
+      setResults(results);
+      resolve();
+    }).then(() => console.log(`finished searching ${query}`));
   }, [query, items.length]);
 
   useEffect(() => {

@@ -1,37 +1,38 @@
+import { ChevronRightIcon } from "@chakra-ui/icons";
 import {
-  Flex,
-  Text,
-  Input,
   Accordion,
-  AccordionItem,
   AccordionButton,
-  AccordionPanel,
   AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Box,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableCaption,
-  Kbd,
-  Heading,
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
+  Button,
+  Flex,
+  Heading,
+  Input,
   InputGroup,
   InputRightElement,
-  Button,
+  Kbd,
+  Table,
+  TableCaption,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
 } from "@chakra-ui/react";
-import { ChevronRightIcon } from "@chakra-ui/icons";
-import React, { useState } from "react";
-import FileGrid from "../components/FileGrid";
-import { useSelector, actions } from "../data/store";
 import { sumBy } from "lodash";
-import { NavLink } from "react-router-dom";
-import useSearchResults from "../utils/useSearchResults";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import { NavLink } from "react-router-dom";
+import FileGrid from "../components/FileGrid";
+import { actions, useSelector } from "../data/store";
+import CategoryState from "../types/category-states";
+import useSearchResults from "../utils/useSearchResults";
 
 export default function Search() {
   const dispatch = useDispatch();
@@ -64,11 +65,14 @@ export default function Search() {
           value={query}
           onChange={handleQueryChange}
         />
-        <InputRightElement w="12rem" h="full">
-          <Button size="sm" onClick={handleSearchAllResources}>
-            Search All Resources
-          </Button>
-        </InputRightElement>
+        {(subcategories.some((s) => s.state === CategoryState.INIT) ||
+          categories.some((c) => c.state === CategoryState.INIT)) && (
+          <InputRightElement w="12rem" h="full">
+            <Button size="sm" onClick={handleSearchAllResources}>
+              Search All Resources
+            </Button>
+          </InputRightElement>
+        )}
       </InputGroup>
       <Accordion w="full" mt={4} mb={16} allowToggle>
         <AccordionItem>
@@ -96,7 +100,7 @@ export default function Search() {
                   <Th>Description</Th>
                 </Tr>
               </Thead>
-              <Tbody fontWeight={300}>
+              <Tbody fontWeight="300">
                 <Tr>
                   <Td>Shortened Words</Td>
                   <Td>"Fuzzy" Match</Td>
@@ -214,7 +218,7 @@ export default function Search() {
               ))}
             </Breadcrumb>
           </Heading>
-          <FileGrid files={files} loading={false} queue={[]} folderId="" />
+          <FileGrid files={files} loading={false} />
         </Box>
       ))}
     </Flex>

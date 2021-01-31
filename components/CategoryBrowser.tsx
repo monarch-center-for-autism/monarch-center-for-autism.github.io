@@ -1,26 +1,31 @@
-import React from "react";
-import { Heading, Box } from "@chakra-ui/react";
-import { useSelector } from "../data/store";
+import { Box, Heading } from "@chakra-ui/react";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { fetchCategory, useSelector } from "../data/store";
 import { Category } from "../types/types";
+import CategoryState from "../types/category-states";
 import FileGrid from "./FileGrid";
 
 type Props = { category: Category };
 export default function CategoryBrowser({ category }: Props) {
-  const { id, files, loading, queue } = category;
+  const dispatch = useDispatch();
+  const { id, files, state } = category;
   const subcategories = useSelector((state) => state.subcategories).filter(
     ({ categoryId }) => categoryId === id
   );
 
+  useEffect(() => {
+    [category, ...subcategories]
+      .filter((c) => c.state === CategoryState.INIT)
+      .forEach((category, i) =>
+        dispatch(fetchCategory({ category, isSubcategory: i > 0 }))
+      );
+  }, []);
+
   return (
     <>
       <Box mb={files.length > 0 ? 8 : 0}>
-        <FileGrid
-          files={files}
-          loading={loading}
-          queue={queue}
-          folderId={id}
-          isSubcategory={false}
-        />
+        <FileGrid files={files} loading={state === CategoryState.LOADING} />
       </Box>
       {subcategories.map((s, i) => (
         <Box mb={8} key={i}>
@@ -28,10 +33,8 @@ export default function CategoryBrowser({ category }: Props) {
             {s.name}
           </Heading>
           <FileGrid
-            folderId={s.id}
-            queue={s.queue}
             files={s.files}
-            loading={s.loading}
+            loading={s.state === CategoryState.LOADING}
           />
         </Box>
       ))}
