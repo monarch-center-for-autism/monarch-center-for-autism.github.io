@@ -1,24 +1,32 @@
 import { Box, Image, Text } from "@chakra-ui/react";
+import Fuse from "fuse.js";
 import React, { useEffect, useState } from "react";
+import reduceFuseMatches from "../utils/reduce-fuse-matches";
 import { getThumbnail } from "../data/google-apis";
 import { File } from "../types/types";
+import FuseResultMatch = Fuse.FuseResultMatch;
 
 type Props = {
   file: File;
-  key?: any;
+  matches?: Readonly<FuseResultMatch[]>;
   onClick: () => any;
 };
-export default function File({ file, onClick }: Props) {
+export default function File({ file, matches = [], onClick }: Props) {
   const { name, iconLink, description } = file ?? {};
   const [thumbnailLink, setThumbnailLink] = useState("");
 
   useEffect(() => {
-    getThumbnail(file)
-      .then(setThumbnailLink)
-      .catch(() => {
-        setThumbnailLink(file.thumbnailLink);
-      });
+    getThumbnail(file).then(setThumbnailLink);
   }, []);
+
+  const nameMatch = matches.find((m) => m.key === "name");
+  const displayName = nameMatch
+    ? reduceFuseMatches(nameMatch)
+    : [{ text: name }];
+  const descriptionMatch = matches.find((m) => m.key === "description");
+  const displayDescription = descriptionMatch
+    ? reduceFuseMatches(descriptionMatch)
+    : [{ text: description }];
 
   return (
     <Box
@@ -55,10 +63,20 @@ export default function File({ file, onClick }: Props) {
             display="inline-block"
             alt=""
           />
-          {name}
+          {displayName.map(({ text, as }) => (
+            <Text as={as} display="inline">
+              {text}
+            </Text>
+          ))}
         </Text>
 
-        <Text>{description}</Text>
+        <Text>
+          {displayDescription.map(({ text, as }) => (
+            <Text as={as} display="inline">
+              {text}
+            </Text>
+          ))}
+        </Text>
       </Box>
     </Box>
   );

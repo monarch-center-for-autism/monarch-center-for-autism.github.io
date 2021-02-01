@@ -1,39 +1,35 @@
 import Fuse from "fuse.js";
-import { groupBy, maxBy, orderBy, sumBy } from "lodash";
-import { useEffect, useState } from "react";
+import { groupBy, maxBy, orderBy, sumBy, debounce } from "lodash";
+import { useEffect, useState, useCallback } from "react";
 import { useSelector } from "../data/store";
 import { File } from "../types/types";
 import { fireGtmEvent } from "../data/google-apis";
+import FuseResult = Fuse.FuseResult;
 
 const fuse = new Fuse([], {
   keys: ["name", "description"],
   includeMatches: true,
   findAllMatches: true,
   useExtendedSearch: true,
+  minMatchCharLength: 3,
+  threshold: 0.4,
 });
 
 type Crumb = { name: string; href: string };
 type Result = {
   crumbs: Crumb[];
-  files: File[];
+  files: FuseResult<File>[];
 };
 
 export default function useSearchResults(items, query) {
   const pages = useSelector((state) => state.pages);
   const categories = useSelector((state) => state.categories);
   const subcategories = useSelector((state) => state.subcategories);
+  const isUpdating = useSelector(
+    (state) => state.modals.downloadAllFilesModalVisible
+  );
 
   const [results, setResults] = useState<Result[]>([]);
-
-  function fixParent(file: File): File {
-    const parent =
-      subcategories.find(
-        (s) =>
-          s.id === file.parents[0] ||
-          s.files.findIndex((f) => f.id === file.id) > -1
-      )?.id ?? file.parents[0];
-    return { ...file, parents: [parent] };
-  }
 
   function getCrumbs(parent: string): Crumb[] {
     let tmp = parent;
@@ -47,7 +43,7 @@ export default function useSearchResults(items, query) {
     const page = pages.find((p) => p.id === tmp);
 
     return [
-      { name: page.name, href: `/${page.id}` },
+      page && { name: page.name, href: `/${page.id}` },
       category && {
         name: category.name,
         href: `/${page.id}/${category.id}`,
@@ -59,15 +55,10 @@ export default function useSearchResults(items, query) {
     ].filter((x) => !!x);
   }
 
-  useEffect(() => {
-    console.log(`searching ${query}`);
-    new Promise<void>((resolve) => {
-      const fuseResults = fuse.search<File>(query);
-      const fixedParents = fuseResults.map((r) => ({
-        ...r,
-        item: fixParent(r.item),
-      }));
-      const groups = groupBy(fixedParents, "item.parents[0]");
+  const calculateResults = useCallback(
+    debounce((q) => {
+      const fuseResults = fuse.search<File>(q);
+      const groups = groupBy(fuseResults, "item.parents[0]");
       const orderedEntries = orderBy(
         Object.entries(groups),
         [(g) => maxBy(g, "score")],
@@ -75,12 +66,18 @@ export default function useSearchResults(items, query) {
       );
       const results = orderedEntries.map(([parent, results]) => ({
         crumbs: getCrumbs(parent),
-        files: orderBy(results, ["score"], ["desc"]).map((r) => r.item),
+        files: orderBy(results, ["score"], ["desc"]),
       }));
 
       setResults(results);
-      resolve();
-    }).then(() => console.log(`finished searching ${query}`));
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    if (!isUpdating) {
+      calculateResults(query);
+    }
   }, [query, items.length]);
 
   useEffect(() => {

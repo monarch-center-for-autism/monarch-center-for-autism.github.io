@@ -218,7 +218,7 @@ export default function Search() {
               ))}
             </Breadcrumb>
           </Heading>
-          <FileGrid files={files} loading={false} />
+          <FileGrid payload={{ type: "search", files }} loading={false} />
         </Box>
       ))}
     </Flex>

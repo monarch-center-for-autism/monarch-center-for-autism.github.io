@@ -9,9 +9,5 @@
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "moduleResolution": "Node",
-        "baseUrl": ".",
-        "paths": {
-            "~/*": ["./*"]
-        }
     }
 }

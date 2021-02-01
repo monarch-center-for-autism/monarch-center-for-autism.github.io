@@ -25,7 +25,10 @@ export default function CategoryBrowser({ category }: Props) {
   return (
     <>
       <Box mb={files.length > 0 ? 8 : 0}>
-        <FileGrid files={files} loading={state === CategoryState.LOADING} />
+        <FileGrid
+          payload={{ type: "normal", files }}
+          loading={state === CategoryState.LOADING}
+        />
       </Box>
       {subcategories.map((s, i) => (
         <Box mb={8} key={i}>
@@ -33,7 +36,7 @@ export default function CategoryBrowser({ category }: Props) {
             {s.name}
           </Heading>
           <FileGrid
-            files={s.files}
+            payload={{ type: "normal", files: s.files }}
             loading={s.state === CategoryState.LOADING}
           />
         </Box>
