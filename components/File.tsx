@@ -63,16 +63,16 @@ export default function File({ file, matches = [], onClick }: Props) {
             display="inline-block"
             alt=""
           />
-          {displayName.map(({ text, as }) => (
-            <Text as={as} display="inline">
+          {displayName.map(({ text, as }, i) => (
+            <Text as={as} display="inline" key={i}>
               {text}
             </Text>
           ))}
         </Text>
 
         <Text>
-          {displayDescription.map(({ text, as }) => (
-            <Text as={as} display="inline">
+          {displayDescription.map(({ text, as }, i) => (
+            <Text as={as} display="inline" key={i}>
               {text}
             </Text>
           ))}

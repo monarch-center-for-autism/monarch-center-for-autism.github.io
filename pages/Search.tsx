@@ -202,15 +202,15 @@ export default function Search() {
           Your search didn't match any files.
         </Text>
       )}
-      {results.map(({ crumbs, files }) => (
-        <Box mb={16} w="full">
+      {results.map(({ crumbs, files }, i) => (
+        <Box mb={16} w="full" key={i}>
           <Heading mb={4} textAlign="left">
             <Breadcrumb
               spacing="8px"
               separator={<ChevronRightIcon color="gray.500" />}
             >
-              {crumbs.map(({ name, href }) => (
-                <BreadcrumbItem>
+              {crumbs.map(({ name, href }, j) => (
+                <BreadcrumbItem key={j}>
                   <BreadcrumbLink to={href} as={NavLink}>
                     {name}
                   </BreadcrumbLink>

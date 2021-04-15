@@ -50,10 +50,10 @@ export default function Sidebar() {
   return (
     <Box p={4} bg="gray.200" w={60} flexShrink={0}>
       <Flex direction="column" alignItems="center">
-        <SkeletonCircle isLoaded={user} mb={4} size="10">
+        <SkeletonCircle isLoaded={!!user} mb={4} size="10">
           <Avatar name={user?.name} src={user?.imageUrl} />
         </SkeletonCircle>
-        <Skeleton isLoaded={user}>
+        <Skeleton isLoaded={!!user}>
           <Text color="gray.600">
             Hello, {user?.name ?? "name placeholder"}!
           </Text>

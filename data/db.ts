@@ -82,6 +82,7 @@ class Database extends Dexie {
     );
     if (Date.now() > cacheInvalidationTime) {
       await this.files.clear();
+      localStorage.removeItem("fileInvalidationTime");
       return null;
     }
 

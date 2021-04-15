@@ -21,7 +21,7 @@ import * as google from "./google-apis";
 import db from "./db";
 
 type State = {
-  user?: gapi.auth2.GoogleUser;
+  user?: { name: string; imageUrl: string; email: string };
   pages: Folder[];
   categories: Category[];
   subcategories: Subcategory[];
