@@ -1,6 +1,6 @@
 import { Flex, Heading, Text, Image } from "@chakra-ui/react";
 import React from "react";
-import logo from "../public/logo.png";
+import logo from "url:../public/logo.png";
 
 export default function Home() {
   return (

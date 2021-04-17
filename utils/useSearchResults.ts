@@ -1,10 +1,11 @@
 import Fuse from "fuse.js";
 import { groupBy, maxBy, orderBy, sumBy, debounce } from "lodash";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "../data/store";
 import { File } from "../types/types";
 import { fireGtmEvent } from "../data/google-apis";
-import FuseResult = Fuse.FuseResult;
+
+type FuseResult<T> = Fuse.FuseResult<T>;
 
 const fuse = new Fuse([], {
   keys: ["name", "description"],

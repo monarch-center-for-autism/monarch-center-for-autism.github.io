@@ -7,8 +7,8 @@ import React, { useState } from "react";
 import File from "./File";
 import { actions } from "../data/store";
 import { File as FileType } from "../types/types";
-import FuseResult = Fuse.FuseResult;
 
+type FuseResult<T> = Fuse.FuseResult<T>;
 type NormalFiles = { type: "normal"; files: FileType[] };
 type SearchFiles = { type: "search"; files: FuseResult<FileType>[] };
 type Props = { payload: NormalFiles | SearchFiles; loading: boolean };

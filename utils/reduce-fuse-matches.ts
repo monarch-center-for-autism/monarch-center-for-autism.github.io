@@ -1,7 +1,8 @@
 import { last } from "lodash";
 import Fuse from "fuse.js";
 import React from "react";
-import FuseResultMatch = Fuse.FuseResultMatch;
+
+type FuseResultMatch = Fuse.FuseResultMatch;
 
 type Match = { text: string; as?: React.ElementType };
 export default function reduceFuseMatches(match: FuseResultMatch): Match[] {

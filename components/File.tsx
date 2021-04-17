@@ -3,17 +3,18 @@ import Fuse from "fuse.js";
 import React, { useEffect, useState } from "react";
 import reduceFuseMatches from "../utils/reduce-fuse-matches";
 import { getThumbnail } from "../data/google-apis";
-import { File } from "../types/types";
-import FuseResultMatch = Fuse.FuseResultMatch;
+import { File as FileType } from "../types/types";
+
+type FuseResultMatch = Fuse.FuseResultMatch;
 
 type Props = {
-  file: File;
+  file: FileType;
   matches?: Readonly<FuseResultMatch[]>;
   onClick: () => any;
 };
 export default function File({ file, matches = [], onClick }: Props) {
   const { name, iconLink, description } = file ?? {};
-  const [thumbnailLink, setThumbnailLink] = useState("");
+  const [thumbnailLink, setThumbnailLink] = useState(iconLink);
 
   useEffect(() => {
     getThumbnail(file).then(setThumbnailLink);

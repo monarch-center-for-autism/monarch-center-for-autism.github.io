@@ -37,7 +37,18 @@ const fetchStructure = createAsyncThunk<SiteStructure, void, {}>(
   async () => {
     const cachedStructure = await db.getStructure();
     if (cachedStructure) {
-      return cachedStructure;
+      const { categories, pages, subcategories } = cachedStructure;
+      return {
+        pages,
+        categories: await aMap(categories, async (category) => ({
+          ...category,
+          files: (await db.getFiles(category.id)) ?? [],
+        })),
+        subcategories: await aMap(subcategories, async (subcategory) => ({
+          ...subcategory,
+          files: (await db.getFiles(subcategory.id)) ?? [],
+        })),
+      };
     }
 
     const pages = await google.getRootFolders();
