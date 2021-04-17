@@ -23,7 +23,7 @@ export default function FileGrid({ payload, loading }: Props) {
   let files;
   switch (payload.type) {
     case "search":
-      files = payload.files.slice(0, maxIndex).map((file, i) => {
+      files = payload.files.slice(0, maxIndex).map((file) => {
         function onClick() {
           dispatch(actions.setActiveFile(file.item));
         }
@@ -33,18 +33,18 @@ export default function FileGrid({ payload, loading }: Props) {
             file={file.item}
             matches={file.matches}
             onClick={onClick}
-            key={i}
+            key={file.item.id}
           />
         );
       });
       break;
     case "normal":
-      files = payload.files.slice(0, maxIndex).map((file, i) => {
+      files = payload.files.slice(0, maxIndex).map((file) => {
         function onClick() {
           dispatch(actions.setActiveFile(file));
         }
 
-        return <File file={file} onClick={onClick} key={i} />;
+        return <File file={file} onClick={onClick} key={file.id} />;
       });
       break;
   }
@@ -53,13 +53,11 @@ export default function FileGrid({ payload, loading }: Props) {
     <SimpleGrid spacing={10} minChildWidth="200px" w="full">
       {files}
       {loading &&
-        Array(10)
-          .fill({})
-          .map((_, i) => (
-            <Skeleton key={i}>
-              <Box h={48} w={48} />
-            </Skeleton>
-          ))}
+        [...Array(10)].map((_, i) => (
+          <Skeleton key={i}>
+            <Box h={48} w={48} />
+          </Skeleton>
+        ))}
       {maxIndex < payload.files.length && (
         <Flex
           flexDirection="column"
@@ -85,11 +83,9 @@ export default function FileGrid({ payload, loading }: Props) {
         </Flex>
       )}
       {/* Keeps the see more files button from stretching */}
-      {Array(5)
-        .fill({})
-        .map((_, i) => (
-          <div key={i} />
-        ))}
+      {[...Array(5)].map((_, i) => (
+        <div key={i} />
+      ))}
     </SimpleGrid>
   );
 }

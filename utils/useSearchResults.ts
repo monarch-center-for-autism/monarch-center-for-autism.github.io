@@ -52,27 +52,24 @@ export default function useSearchResults(items, query) {
         name: subcategory.name,
         href: `${page.id}/${category.id}#${subcategory.id}`,
       },
-    ].filter((x) => !!x);
+    ].filter(Boolean);
   }
 
-  const calculateResults = useCallback(
-    debounce((q) => {
-      const fuseResults = fuse.search<File>(q);
-      const groups = groupBy(fuseResults, "item.parents[0]");
-      const orderedEntries = orderBy(
-        Object.entries(groups),
-        [(g) => maxBy(g, "score")],
-        ["desc"]
-      );
-      const results = orderedEntries.map(([parent, results]) => ({
-        crumbs: getCrumbs(parent),
-        files: orderBy(results, ["score"], ["desc"]),
-      }));
+  const calculateResults = debounce((q) => {
+    const fuseResults = fuse.search<File>(q);
+    const groups = groupBy(fuseResults, "item.parents[0]");
+    const orderedEntries = orderBy(
+      Object.entries(groups),
+      [(g) => maxBy(g, "score")],
+      ["desc"]
+    );
+    const results = orderedEntries.map(([parent, results]) => ({
+      crumbs: getCrumbs(parent),
+      files: orderBy(results, ["score"], ["desc"]),
+    }));
 
-      setResults(results);
-    }, 300),
-    []
-  );
+    setResults(results);
+  }, 300);
 
   useEffect(() => {
     if (!isUpdating) {
