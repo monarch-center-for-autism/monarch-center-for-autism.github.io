@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
+import TagManager from "react-gtm-module";
 import App from "../structure/app";
 import { store } from "../data/store";
 import Fonts from "../structure/Fonts";
@@ -13,6 +14,8 @@ const theme = extendTheme({
     body: "Rubik",
   },
 });
+
+TagManager.initialize({ gtmId: process.env.GTM_ID });
 
 ReactDOM.render(
   <ChakraProvider theme={theme}>
@@ -25,7 +28,3 @@ ReactDOM.render(
   </ChakraProvider>,
   document.getElementById("app")
 );
-
-if (module.hot) {
-  module.hot.accept();
-}
