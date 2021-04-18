@@ -14,7 +14,7 @@ type Props = {
 };
 export default function File({ file, matches = [], onClick }: Props) {
   const { name, iconLink, description } = file ?? {};
-  const [thumbnailLink, setThumbnailLink] = useState(iconLink);
+  const [thumbnailLink, setThumbnailLink] = useState("");
 
   useEffect(() => {
     getThumbnail(file).then(setThumbnailLink);
@@ -44,7 +44,26 @@ export default function File({ file, matches = [], onClick }: Props) {
       position="relative"
       overflow="hidden"
     >
-      <Image src={thumbnailLink} alt="" position="absolute" w="full" h="auto" />
+      <Image
+        src={thumbnailLink}
+        alt=""
+        crossOrigin="use-credentials"
+        fallback={
+          <Image
+            src={iconLink}
+            alt=""
+            w="32px"
+            h="32px"
+            position="absolute"
+            top="50%"
+            left="50%"
+            transform="translate(-50%, -50%)"
+          />
+        }
+        position="absolute"
+        w="full"
+        h="auto"
+      />
 
       <Box
         p={4}
