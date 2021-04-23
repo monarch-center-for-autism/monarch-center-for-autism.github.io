@@ -52,10 +52,10 @@ export default function FileSpotlight({
       if (folder[Response.ACTION] === Action.PICKED) {
         const targetFolder = folder[Response.DOCUMENTS][0][Document.ID];
         await copyFile(file.id, targetFolder);
-      }
 
-      retrapFocus();
-      // setIsFolderPickerOpen(false);
+        retrapFocus();
+        // setIsFolderPickerOpen(false);
+      }
     }
 
     untrapFocus();

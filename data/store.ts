@@ -40,14 +40,24 @@ const fetchStructure = createAsyncThunk<SiteStructure, void, {}>(
       const { categories, pages, subcategories } = cachedStructure;
       return {
         pages,
-        categories: await aMap(categories, async (category) => ({
-          ...category,
-          files: (await db.getFiles(category.id)) ?? [],
-        })),
-        subcategories: await aMap(subcategories, async (subcategory) => ({
-          ...subcategory,
-          files: (await db.getFiles(subcategory.id)) ?? [],
-        })),
+        categories: await aMap(categories, async (category) => {
+          const files = (await db.getFiles(category.id)) ?? [];
+          return {
+            ...category,
+            files,
+            state:
+              files.length > 0 ? CategoryState.FETCHED : CategoryState.INIT,
+          } as Category;
+        }),
+        subcategories: await aMap(subcategories, async (subcategory) => {
+          const files = (await db.getFiles(subcategory.id)) ?? [];
+          return {
+            ...subcategory,
+            files,
+            state:
+              files.length > 0 ? CategoryState.FETCHED : CategoryState.INIT,
+          };
+        }),
       };
     }
 
