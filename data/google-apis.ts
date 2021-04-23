@@ -173,8 +173,8 @@ export function getPicker(callback: (x: ResponseObject) => void): any {
 }
 
 export async function copyFile(fileId: string, targetFolder: string) {
-  const result = await throttle(async () => {
-    gapi.client.drive.files.copy({ fileId }, { parents: [targetFolder] });
-  });
+  const result = await throttle(async () =>
+    gapi.client.drive.files.copy({ fileId }, { parents: [targetFolder] })
+  );
   console.log(result);
 }
