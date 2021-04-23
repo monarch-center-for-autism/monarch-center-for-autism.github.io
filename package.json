@@ -4,11 +4,9 @@
   "description": "",
   "scripts": {
     "dev": "parcel public/index.html",
-    "build": "parcel build public/index.html public/404.html"
+    "build": "parcel build --no-scope-hoist public/index.html public/404.html"
   },
-  "browserslist": [
-    "since 2017-06"
-  ],
+  "browserslist": "since 2017-06",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -35,7 +33,7 @@
     "throttled-queue": "^1.0.7"
   },
   "devDependencies": {
-    "@parcel/transformer-image": "^2.0.0-beta.2",
+    "@parcel/transformer-image": "2.0.0-beta.2",
     "@types/gapi": "0.0.39",
     "@types/gapi.auth2": "0.0.54",
     "@types/gapi.client.drive": "^3.0.13",
