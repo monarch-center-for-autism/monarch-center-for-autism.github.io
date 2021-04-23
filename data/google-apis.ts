@@ -2,11 +2,13 @@ import { Folder, FileList, File } from "../types/types";
 import throttle from "../utils/throttle";
 import db from "./db";
 
+type ResponseObject = google.picker.ResponseObject;
+
 const DISCOVERY_DOCS = [
   "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
 ];
 const SCOPES = [
-  "https://www.googleapis.com/auth/drive.readonly",
+  "https://www.googleapis.com/auth/drive",
   "https://www.googleapis.com/auth/userinfo.profile",
 ].join(" ");
 
@@ -44,7 +46,9 @@ export function fireGtmEvent(name: string, extras: object) {
 }
 
 export async function initGoogleClient() {
-  await new Promise((resolve) => window.gapi.load("client:auth2", resolve));
+  await new Promise((resolve) =>
+    window.gapi.load("client:auth2:picker", resolve)
+  );
   await window.gapi.client.init({
     apiKey: process.env.API_KEY,
     clientId: process.env.CLIENT_ID,
@@ -70,8 +74,7 @@ export function getUser() {
 }
 
 export function getAccessToken(): string {
-  return window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse()
-    .access_token;
+  return window.gapi.client.getToken().access_token;
 }
 
 export async function signIn() {
@@ -148,4 +151,30 @@ export async function getThumbnail(file: File): Promise<string> {
 
   await db.setImage(file.id, blob);
   return URL.createObjectURL(blob);
+}
+
+export function getPicker(callback: (x: ResponseObject) => void): any {
+  const view = new google.picker.DocsView(google.picker.ViewId.FOLDERS);
+  view.setSelectFolderEnabled(true);
+  view.setMimeTypes("application/vnd.google-apps.folder");
+
+  return (
+    new google.picker.PickerBuilder()
+      .addView(view)
+      .setTitle("")
+      .enableFeature(google.picker.Feature.NAV_HIDDEN)
+      .setOAuthToken(getAccessToken())
+      .setDeveloperKey(process.env.API_KEY)
+      .setCallback(callback)
+      // .toUri();
+      .build()
+      .setVisible(true)
+  );
+}
+
+export async function copyFile(fileId: string, targetFolder: string) {
+  const result = await throttle(async () => {
+    gapi.client.drive.files.copy({ fileId }, { parents: [targetFolder] });
+  });
+  console.log(result);
 }
