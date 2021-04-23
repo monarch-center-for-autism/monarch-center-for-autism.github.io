@@ -1,21 +1,10 @@
-import {
-  Button,
-  ButtonGroup,
-  Flex,
-  Link,
-  Text,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverBody,
-} from "@chakra-ui/react";
-import { faDownload, faCopy } from "@fortawesome/free-solid-svg-icons";
+import { Button, ButtonGroup, Flex, Link, Text } from "@chakra-ui/react";
+import { faCopy, faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
-import { fireGtmEvent, getPicker, copyFile } from "../data/google-apis";
+import React from "react";
+import { copyFile, fireGtmEvent, getPicker } from "../data/google-apis";
 import { File } from "../types/types";
 import mimeTypes from "../utils/mime-types";
-type ResponseObject = google.picker.ResponseObject;
 
 type FileSpotlightProps = {
   file: File;
@@ -27,8 +16,6 @@ export default function FileSpotlight({
   untrapFocus,
   retrapFocus,
 }: FileSpotlightProps) {
-  const [isFolderPickerOpen, setIsFolderPickerOpen] = useState(false);
-  const [pickerUrl, setPickerUrl] = useState("");
   if (!file) return null;
 
   const {
@@ -45,23 +32,25 @@ export default function FileSpotlight({
   ];
 
   function handleMakeCopy() {
-    async function handleFolderPicked(folder: ResponseObject) {
-      console.log(folder);
+    async function handleFolderPicked(folder: google.picker.ResponseObject) {
       const { Response, Action, Document } = google.picker;
 
       if (folder[Response.ACTION] === Action.PICKED) {
         const targetFolder = folder[Response.DOCUMENTS][0][Document.ID];
         await copyFile(file.id, targetFolder);
+      }
 
+      // It could also be "opened"
+      if (
+        folder[Response.ACTION] === Action.PICKED ||
+        folder[Response.ACTION] === Action.CANCEL
+      ) {
         retrapFocus();
-        // setIsFolderPickerOpen(false);
       }
     }
 
     untrapFocus();
-    const pickerUrl = getPicker(handleFolderPicked);
-    // setPickerUrl(pickerUrl);
-    // setIsFolderPickerOpen(true);
+    getPicker(handleFolderPicked);
   }
 
   return (
@@ -91,26 +80,14 @@ export default function FileSpotlight({
             </Button>
           );
         })}
-        <Popover isOpen={isFolderPickerOpen}>
-          <PopoverTrigger>
-            <Button
-              as={Link}
-              leftIcon={<FontAwesomeIcon icon={faCopy} />}
-              my={2}
-              onClick={handleMakeCopy}
-            >
-              Make a Copy in Drive
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent w="45rem" h="25rem">
-            <PopoverBody>
-              <iframe
-                src={pickerUrl}
-                style={{ width: "43rem", height: "24rem" }}
-              />
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
+        <Button
+          as={Link}
+          leftIcon={<FontAwesomeIcon icon={faCopy} />}
+          my={2}
+          onClick={handleMakeCopy}
+        >
+          Make a Copy in Drive
+        </Button>
       </ButtonGroup>
 
       <iframe

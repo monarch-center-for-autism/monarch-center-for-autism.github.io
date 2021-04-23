@@ -153,28 +153,26 @@ export async function getThumbnail(file: File): Promise<string> {
   return URL.createObjectURL(blob);
 }
 
-export function getPicker(callback: (x: ResponseObject) => void): any {
+export function getPicker(
+  callback: (x: ResponseObject) => void
+): google.picker.Picker {
   const view = new google.picker.DocsView(google.picker.ViewId.FOLDERS);
   view.setSelectFolderEnabled(true);
   view.setMimeTypes("application/vnd.google-apps.folder");
 
-  return (
-    new google.picker.PickerBuilder()
-      .addView(view)
-      .setTitle("")
-      .enableFeature(google.picker.Feature.NAV_HIDDEN)
-      .setOAuthToken(getAccessToken())
-      .setDeveloperKey(process.env.API_KEY)
-      .setCallback(callback)
-      // .toUri();
-      .build()
-      .setVisible(true)
-  );
+  return new google.picker.PickerBuilder()
+    .addView(view)
+    .setTitle("")
+    .enableFeature(google.picker.Feature.NAV_HIDDEN)
+    .setOAuthToken(getAccessToken())
+    .setDeveloperKey(process.env.API_KEY)
+    .setCallback(callback)
+    .build()
+    .setVisible(true);
 }
 
 export async function copyFile(fileId: string, targetFolder: string) {
-  const result = await throttle(async () =>
+  await throttle(async () =>
     gapi.client.drive.files.copy({ fileId }, { parents: [targetFolder] })
   );
-  console.log(result);
 }
