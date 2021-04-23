@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { fetchStructure, actions } from "../data/store";
-import { getUser, setGtmVariable } from "../data/google-apis";
 import * as google from "../data/google-apis";
+import { getUser, setGtmVariable } from "../data/google-apis";
+import { actions, fetchStructure } from "../data/store";
 
 export default function useAuth() {
   const dispatch = useDispatch();

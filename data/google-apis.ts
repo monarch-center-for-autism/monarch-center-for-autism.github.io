@@ -1,4 +1,4 @@
-import { Folder, FileList, File } from "../types/types";
+import { File, FileList, Folder } from "../types/types";
 import throttle from "../utils/throttle";
 import db from "./db";
 

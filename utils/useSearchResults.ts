@@ -1,9 +1,9 @@
 import Fuse from "fuse.js";
-import { groupBy, maxBy, orderBy, sumBy, debounce } from "lodash";
+import { debounce, groupBy, maxBy, orderBy, sumBy } from "lodash";
 import { useEffect, useState } from "react";
+import { fireGtmEvent } from "../data/google-apis";
 import { useSelector } from "../data/store";
 import { File } from "../types/types";
-import { fireGtmEvent } from "../data/google-apis";
 
 type FuseResult<T> = Fuse.FuseResult<T>;
 

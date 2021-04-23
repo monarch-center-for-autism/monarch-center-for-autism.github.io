@@ -1,5 +1,5 @@
-import { last } from "lodash";
 import Fuse from "fuse.js";
+import { last } from "lodash";
 import React from "react";
 
 type FuseResultMatch = Fuse.FuseResultMatch;

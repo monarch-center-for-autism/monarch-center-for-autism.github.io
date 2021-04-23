@@ -2,11 +2,11 @@ import { Box, Flex, SimpleGrid, Skeleton, Text } from "@chakra-ui/react";
 import { faChevronCircleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Fuse from "fuse.js";
-import { useDispatch } from "react-redux";
 import React, { useState } from "react";
-import File from "./File";
+import { useDispatch } from "react-redux";
 import { actions } from "../data/store";
 import { File as FileType } from "../types/types";
+import File from "./File";
 
 type FuseResult<T> = Fuse.FuseResult<T>;
 type NormalFiles = { type: "normal"; files: FileType[] };

@@ -7,6 +7,7 @@ import {
   TypedUseSelectorHook,
   useSelector as useUntypedSelector,
 } from "react-redux";
+import CategoryState from "../types/category-states";
 import {
   Category,
   File,
@@ -14,11 +15,10 @@ import {
   SiteStructure,
   Subcategory,
 } from "../types/types";
-import CategoryState from "../types/category-states";
 import { aFlatMap, aMap } from "../utils/aMap";
-import { fireGtmEvent } from "./google-apis";
-import * as google from "./google-apis";
 import db from "./db";
+import * as google from "./google-apis";
+import { fireGtmEvent } from "./google-apis";
 
 type State = {
   user?: { name: string; imageUrl: string; email: string };

@@ -1,17 +1,17 @@
 import {
+  Button,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   ModalOverlay,
-  ModalFooter,
-  Button,
   Progress,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { actions, useSelector, fetchCategory } from "../data/store";
+import { actions, fetchCategory, useSelector } from "../data/store";
 import CategoryState from "../types/category-states";
 
 export default function DownloadAllFilesModal() {

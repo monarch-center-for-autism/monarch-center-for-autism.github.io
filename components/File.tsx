@@ -1,9 +1,9 @@
 import { Box, Image, Text } from "@chakra-ui/react";
 import Fuse from "fuse.js";
 import React, { useEffect, useState } from "react";
-import reduceFuseMatches from "../utils/reduce-fuse-matches";
 import { getThumbnail } from "../data/google-apis";
 import { File as FileType } from "../types/types";
+import reduceFuseMatches from "../utils/reduce-fuse-matches";
 
 type FuseResultMatch = Fuse.FuseResultMatch;
 

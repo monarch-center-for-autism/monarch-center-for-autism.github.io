@@ -1,21 +1,21 @@
 import {
-  Box,
-  Text,
-  Divider,
   Avatar,
+  Box,
+  Divider,
   Flex,
   Link,
   Skeleton,
   SkeletonCircle,
   SkeletonText,
+  Text,
   theme,
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import React from "react";
-import { actions, useSelector } from "../data/store";
+import { useDispatch } from "react-redux";
 import { NavLink } from "react-router-dom";
 import { fireGtmEvent } from "../data/google-apis";
-import { useDispatch } from "react-redux";
+import { actions, useSelector } from "../data/store";
 
 const StyledNavLink = styled(NavLink)`
   &.active {

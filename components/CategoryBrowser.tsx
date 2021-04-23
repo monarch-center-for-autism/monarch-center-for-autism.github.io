@@ -2,8 +2,8 @@ import { Box, Heading } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { fetchCategory, useSelector } from "../data/store";
-import { Category } from "../types/types";
 import CategoryState from "../types/category-states";
+import { Category } from "../types/types";
 import FileGrid from "./FileGrid";
 
 type Props = { category: Category };

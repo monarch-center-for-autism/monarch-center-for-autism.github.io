@@ -1,12 +1,12 @@
 import {
+  Button,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   ModalOverlay,
-  ModalFooter,
-  Button,
 } from "@chakra-ui/react";
 import React from "react";
 import { useDispatch } from "react-redux";
