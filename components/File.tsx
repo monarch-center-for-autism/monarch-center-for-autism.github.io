@@ -47,17 +47,25 @@ export default function File({ file, matches = [], onClick }: Props) {
       <Image
         src={thumbnailLink}
         alt=""
-        crossOrigin="use-credentials"
         fallback={
           <Image
-            src={iconLink}
+            src={file.thumbnailLink}
             alt=""
-            w="32px"
-            h="32px"
+            fallback={
+              <Image
+                src={iconLink}
+                alt=""
+                w="32px"
+                h="32px"
+                position="absolute"
+                top="50%"
+                left="50%"
+                transform="translate(-50%, -50%)"
+              />
+            }
             position="absolute"
-            top="50%"
-            left="50%"
-            transform="translate(-50%, -50%)"
+            w="full"
+            h="auto"
           />
         }
         position="absolute"

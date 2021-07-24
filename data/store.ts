@@ -198,6 +198,7 @@ const { actions, reducer } = createSlice({
         state.subcategories[i].state = CategoryState.INIT;
       } else {
         const i = state.categories.findIndex((c) => c.id === category.id);
+        if (i === -1) return;
         state.categories[i].state = CategoryState.INIT;
       }
     });
